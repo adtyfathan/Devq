@@ -14,6 +14,11 @@ return [
     |
     */
 
+    'quizapi' => [
+        'key' => env('QUIZ_API_KEY'),
+        'url' => env('QUIZ_API_URL'),
+    ],
+    
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FallbackController;
 use App\Http\Controllers\HomeController;
@@ -18,6 +19,8 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get("/quiz/questions/{category?}/{difficulty?}", [QuizController::class, "showQuiz"])->name("quiz.show");
 });
 
 // ✅ Fallback Route (Handles 404 errors)
