@@ -16,12 +16,11 @@ class QuizController extends Controller
 
     public function showQuiz($category = null, $difficulty = null)
     {
-        $category = $category ?? 'Programming';   // Default category
+        $category = $category ?? 'Code';   // Default category
         $difficulty = $difficulty ?? 'Easy';  // Default difficulty
         
         $questions = $this->quizService->fetchQuestions($category, $difficulty);
-        return view('quiz.index', compact('questions'));
-        
+        return view('quiz.index', compact('questions')); 
     }
 }
 
