@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Quiz;
 use App\Services\QuizService;
+use Illuminate\Http\Request;
 
 class QuizController extends Controller
 {
@@ -14,13 +16,11 @@ class QuizController extends Controller
         $this->quizService = $quizService;
     }
 
-    public function showQuiz($category = null, $difficulty = null)
+    public function getQuestions($category = null, $difficulty = null, $page = 1, $perPage = 10)
     {
-        $category = $category ?? 'Code';   // Default category
-        $difficulty = $difficulty ?? 'Easy';  // Default difficulty
-        
-        $questions = $this->quizService->fetchQuestions($category, $difficulty);
-        return view('quiz.index', compact('questions')); 
+        $questions = $this->quizService->fetchQuestions($category, $difficulty, $page, $perPage);
+
+       return view('quiz.index', ['questions' => $questions]);
     }
 }
 

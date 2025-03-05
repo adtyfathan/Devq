@@ -1,7 +1,7 @@
 <x-layouts.app title="Quiz">
     <h2>Quiz Questions</h2>
     
-    @foreach ($questions as $question)
+    @foreach ($questions['data'] as $question)
         <div class="question-box">
             <h3>{{ $question['question'] }}</h3>
             <ul>

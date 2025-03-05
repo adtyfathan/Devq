@@ -2,7 +2,10 @@
     <main>
         <h1>Home cik</h1>
 
-        <h1>Quiz mudah acak</h1>
+        <x-card category="Code" difficulty="Easy" page="1" />
+
+
+        {{-- <h1>Quiz mudah acak</h1>
         <a href="{{ route('quiz.show', ['category' => 'Code', 'difficulty' => 'Easy']) }}" class="btn btn-primary">
             Start Easy Quiz
         </a>
@@ -30,7 +33,7 @@
         <h1>Quiz Node JS</h1>
         <a href="{{ route('quiz.show', ['category' => 'NodeJS']) }}" class="btn btn-secondary">
             Start Node JS Quiz
-        </a>
+        </a> --}}
 
 
         <form method="POST" action="{{ route('logout') }}">
@@ -45,5 +48,5 @@
 @endpush
 
 @push('js')
-    @vite(['resources/css/home.js'])
+    @vite(['resources/css/home.js https://code.jquery.com/jquery-3.6.0.min.js'])
 @endpush
