@@ -15,10 +15,10 @@ class QuizService
         $this->apiKey = config('services.quizapi.key');
     }
 
-    public function fetchQuestions($category = null, $difficulty = null, $page = 1, $perPage = 10)
+    public function fetchQuestions($category = null, $difficulty = null, $limit)
     {
         $params = [
-            'limit' => 20 // sementara buat testing
+            'limit' => $limit // sementara buat testing
         ];
 
         if ($category) {
@@ -38,14 +38,6 @@ class QuizService
         }
 
         // Get API response as an array
-        $questions = $response->json();
-
-        return [
-            'current_page' => $page,
-            'per_page' => $perPage,
-            'total' => count($questions), 
-            'last_page' => ceil(count($questions) / $perPage),
-            'data' => $questions, // Directly return the filtered questions
-        ];
+        return $response->json();
     }
 }

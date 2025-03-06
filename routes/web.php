@@ -20,7 +20,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::get("/quiz/{category?}/{difficulty?}/{page?}/{perPage?}", [QuizController::class, "getQuestions"])->name("show-quiz");
+    Route::get("/quiz/{category?}", [QuizController::class, "getQuestions"])->name("show-quiz");
+
 });
 
 // ✅ Fallback Route (Handles 404 errors)

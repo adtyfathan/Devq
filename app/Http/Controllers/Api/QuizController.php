@@ -16,11 +16,14 @@ class QuizController extends Controller
         $this->quizService = $quizService;
     }
 
-    public function getQuestions($category = null, $difficulty = null, $page = 1, $perPage = 10)
+    public function getQuestions(Request $request, $category = null)
     {
-        $questions = $this->quizService->fetchQuestions($category, $difficulty, $page, $perPage);
+        $difficulty = $request->query('difficulty', 'easy'); // Default to 'easy'
+        $limit = $request->query('limit', 10); // Default to 101
+        
+        $questions = $this->quizService->fetchQuestions($category, $difficulty, $limit);
 
-       return view('quiz.index', ['questions' => $questions]);
+        return view('quiz.index', ['questions' => $questions]);
     }
 }
 
