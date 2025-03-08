@@ -1,55 +1,61 @@
 document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = window.location.pathname.split("/").pop();
+    const difficulty = urlParams.get("difficulty") || "easy";
+    const limit = urlParams.get("limit") || 10;
+
+    let questions = [];
     let currentQuestionIndex = 0;
 
-    function loadNextQuestion() {
-        fetch('/quiz/next')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(text => {
-                try {
-                    const data = JSON.parse(text); // Try parsing JSON
-                    if (data.question) {
-                        displayQuestion(data.question);
-                    } else {
-                        document.getElementById("quiz-container").innerHTML = `<p>Quiz Completed!</p>`;
-                        document.getElementById("nextQuestionBtn").style.display = "none";
-                    }
-                } catch {
-                    console.error("Invalid JSON response.");
-                }
-            })
-            .catch(() => {
-                console.error("Failed to fetch the next question.");
-            });
-    }
+    const quizContainer = document.getElementById("quiz-container");
+    const nextButton = document.getElementById("nextQuestionBtn");
 
+    function fetchQuestions() {
+        fetch(`/api/questions?category=${category}&difficulty=${difficulty}&limit=${limit}`)
+            .then(response => response.json())
+            .then(data => {
+                questions = data.questions;
+                if (questions.length > 0) {
+                    displayQuestion(questions[currentQuestionIndex]);
+                } else {
+                    quizContainer.innerHTML = "<p>No questions found.</p>";
+                }
+            })
+            .catch(error => console.error("Fetch error:", error));
+    }
 
     function displayQuestion(question) {
-        document.getElementById("quiz-container").innerHTML = `
+        quizContainer.innerHTML = `
             <h3>${currentQuestionIndex + 1}. ${question.question}</h3>
-            <ul>
-                ${Object.entries(question.answers).map(([key, answer]) => answer ? `
-                    <li>
-                        <input type="radio" name="question" value="${key}" class="answer-option">
-                        ${answer}
-                    </li>
-                ` : '').join('')}
+            <ul id="answers">
+                ${Object.entries(question.answers)
+                .map(([key, answer]) => answer ? `
+                        <li>
+                            <input type="radio" name="question" value="${key}" class="answer-option">
+                            ${answer}
+                        </li>` : '')
+                .join('')}
             </ul>
         `;
-        document.getElementById("nextQuestionBtn").style.display = "none";
+
+        nextButton.style.display = "none";
+
+        document.querySelectorAll(".answer-option").forEach(option => {
+            option.addEventListener("change", function () {
+                nextButton.style.display = "block";
+            });
+        });
     }
 
-    document.getElementById("quiz-container").addEventListener("change", function () {
-        document.getElementById("nextQuestionBtn").style.display = "block";
+    nextButton.addEventListener("click", function () {
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            displayQuestion(questions[currentQuestionIndex]);
+        } else {
+            quizContainer.innerHTML = "<p>Quiz Completed!</p>";
+            nextButton.style.display = "none";
+        }
     });
 
-    document.getElementById("nextQuestionBtn").addEventListener("click", function () {
-        currentQuestionIndex++;
-        loadNextQuestion();
-    });
-    loadNextQuestion(); // Start quiz 
+    fetchQuestions();
 });

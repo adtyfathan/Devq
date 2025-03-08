@@ -2,7 +2,7 @@
 
 <div class="quiz-card">
     <img src="{{ $img }}" />
-    <form action="{{ route('quiz.start', ['category' => $category]) }}" method="GET">
+    <form action="{{ route('quiz.show', ['category' => $category]) }}" method="GET">
         <h1>{{ $category }} Quiz</h1>
         
         <p>Select difficulty</p>

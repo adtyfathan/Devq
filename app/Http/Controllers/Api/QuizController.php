@@ -16,18 +16,29 @@ class QuizController extends Controller
         $this->quizService = $quizService;
     }
 
+    public function showQuiz(Request $request, $category)
+    {
+        $difficulty = $request->query('difficulty', 'easy'); 
+        $limit = $request->query('limit', 10); 
+
+        return view('quiz.index', compact('category', 'difficulty', 'limit'));
+    }
+
     // HAPUS SESSION PAS QUIZ SELESAI
     
-    public function getQuestions(Request $request, $category = null)
+    public function getQuestions(Request $request)
     {
+        $category = $request->query('category', null);
         $difficulty = $request->query('difficulty', 'easy'); 
         $limit = $request->query('limit', 10);
         
+        if (!$category) {
+            return response()->json(["error" => "Category is required"], 400);
+        }
+        
         $questions = $this->quizService->fetchQuestions($category, $difficulty, $limit);
 
-        session(['questions' => $questions, 'index' => 0]);
-
-        return view('quiz.index');
+        return response()->json(["questions" => $questions]);
     }
 
     public function getNextQuestion(Request $request)
