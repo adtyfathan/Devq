@@ -1,28 +1,18 @@
 <x-layouts.app title="Quiz">
-    <h2>Quiz Questions</h2>
+    <h2>Quiz</h2>
 
-    @foreach ($questions as $index => $question)
-        <div class="question-box">
-            <h3>{{ $index + 1 }}. {{ $question['question'] }}</h3>
-            <ul>
-                @foreach ($question['answers'] as $key => $answer)
-                    @if ($answer)
-                        <li>
-                            <input type="radio" name="question_{{ $question['id'] }}" value="{{ $key }}">
-                            {{ $answer }}
-                        </li>
-                    @endif
-                @endforeach
-            </ul>
-        </div>
-    @endforeach
+    <div id="quiz-container">
+
+    </div>
+
+    <button id="nextQuestionBtn" style="display: none;">Next</button>
 
 </x-layouts.app>
 
 @push('css')
-    @vite(['resources/css/home.css'])
+    @vite(['resources/css/quiz.css'])
 @endpush
 
 @push('js')
-    @vite(['resources/js/home.js'])
+    @vite(['resources/js/quiz.js'])
 @endpush
