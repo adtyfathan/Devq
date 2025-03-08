@@ -6,9 +6,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let questions = [];
     let currentQuestionIndex = 0;
+    let countdown;
+    let timeLeft = 10;
+    let selectedAnswer = [];
 
     const quizContainer = document.getElementById("quiz-container");
-    const nextButton = document.getElementById("nextQuestionBtn");
+    const timerText = document.getElementById("timer");;
+
+    function getCorrectAnswers(correctAnswers){
+        return Object.entries(correctAnswers)
+            .filter(([key, value]) => value === "true") // Filter only correct answers
+            .map(([key]) => key.replace("_correct", "")) // Extract the answer key
+            .shift();
+    }
 
     function fetchQuestions() {
         fetch(`/api/questions?category=${category}&difficulty=${difficulty}&limit=${limit}`)
@@ -22,6 +32,28 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             })
             .catch(error => console.error("Fetch error:", error));
+    }
+
+    function startTimer() {
+        clearInterval(countdown); 
+        timeLeft = 10; 
+        timerText.innerHTML = `Timer: ${timeLeft}`;
+
+        countdown = setInterval(() => {
+            timeLeft--;
+            timerText.innerHTML = `Timer: ${timeLeft}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+
+                const correctAnswer = getCorrectAnswers(questions[currentQuestionIndex].correct_answers);
+
+                checkAnswer(correctAnswer, null);
+
+                // jeda buat animasi benar/salah
+                setTimeout(nextQuestion, 3000);
+            }
+        }, 1000);
     }
 
     function displayQuestion(question) {
@@ -38,24 +70,48 @@ document.addEventListener("DOMContentLoaded", function () {
             </ul>
         `;
 
-        nextButton.style.display = "none";
+        startTimer();
 
         document.querySelectorAll(".answer-option").forEach(option => {
             option.addEventListener("change", function () {
-                nextButton.style.display = "block";
+                selectedAnswer[currentQuestionIndex] = this.value
+
+                const correctAnswer = getCorrectAnswers(questions[currentQuestionIndex].correct_answers);
+                const userAnswer = this.value;
+
+                document.querySelectorAll(".answer-option").forEach(input => {
+                    input.disabled = true;
+                });
+
+                checkAnswer(correctAnswer, userAnswer);
+
+                clearInterval(countdown); 
+
+                // jeda buat animasi benar/salah
+                setTimeout(nextQuestion, 3000);
             });
         });
     }
 
-    nextButton.addEventListener("click", function () {
+    function checkAnswer(correctAnswer, userAnswer){
+        if (correctAnswer === userAnswer) {
+            alert("Benar");
+        } else {
+            alert(`Salah, jawaban benar ${correctAnswer}`);
+        }
+    }
+
+    function nextQuestion() {
+        clearInterval(countdown); 
         if (currentQuestionIndex < questions.length - 1) {
             currentQuestionIndex++;
             displayQuestion(questions[currentQuestionIndex]);
         } else {
+            // push user id, new generated quiz id, score, jawaban benar, questions, selected answer, time generated
             quizContainer.innerHTML = "<p>Quiz Completed!</p>";
-            nextButton.style.display = "none";
+            console.log(selectedAnswer);
         }
-    });
+    }
 
     fetchQuestions();
 });
