@@ -1,5 +1,5 @@
 <x-layouts.app title="Quiz">
-    <h2>Quiz</h2>
+    <h1 id="timer"></h1>
 
     <div id="quiz-container">
 
