@@ -15,8 +15,10 @@
             
             <x-card category="Django" img="{{ asset('images/django.png') }}" />
             
+            {{-- easy 0 --}}
             <x-card category="Postgres" img="{{ asset('images/postgres.png') }}" />
             
+            {{-- easy 15 --}}
             <x-card category="React" img="{{ asset('images/react.png') }}" />
             
             <x-card category="Next.js" img="{{ asset('images/next.png') }}" />
@@ -28,6 +30,16 @@
             <x-card category="Apache Kafka" img="{{ asset('images/apache_kafka.png') }}" />
             
             <x-card category="Wordpress" img="{{ asset('images/wordpress.png') }}" />
+
+            {{-- easy 5, hard 15 --}}
+            <x-card category="Bash" img="{{ asset('images/bash.png') }}" />
+
+            <x-card category="Docker" img="{{ asset('images/docker.png') }}" />
+
+            {{-- easy 11 --}}
+            <x-card category="Laravel" img="{{ asset('images/laravel.png') }}" />
+
+
         </div>
 
         <form method="POST" action="{{ route('logout') }}">
