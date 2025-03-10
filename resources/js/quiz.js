@@ -109,7 +109,6 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             // push user id, new generated quiz id, score, jawaban benar, questions, selected answer, time generated
             quizContainer.innerHTML = "<p>Quiz Completed!</p>";
-            console.log(selectedAnswer);
         }
     }
 
