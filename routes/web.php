@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\QuizController;
+use App\Http\Controllers\QuizController as WebQuizController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FallbackController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // ✅ Public Routes (Guests Only)
@@ -18,8 +20,10 @@ Route::middleware('guest')->group(function () {
 // ✅ Protected Routes (Requires Authentication)
 Route::middleware('auth')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
+    Route::get('user/{id}', [UserController::class, 'getUserById'])->name('user.show');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/quiz/{category}', [QuizController::class, 'showQuiz'])->name('quiz.show');
+    Route::post('quiz/store', [WebQuizController::class, 'store'])->name('quiz.store');
 });
 
 Route::get('api/questions', [QuizController::class, 'getQuestions'])->name('quiz.api');

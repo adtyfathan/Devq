@@ -9,14 +9,15 @@ document.addEventListener("DOMContentLoaded", function () {
     let countdown;
     let timeLeft = 10;
     let selectedAnswer = [];
+    let falseAnswerCount = 0;
 
     const quizContainer = document.getElementById("quiz-container");
-    const timerText = document.getElementById("timer");;
+    const timerText = document.getElementById("timer");
 
     function getCorrectAnswers(correctAnswers){
         return Object.entries(correctAnswers)
-            .filter(([key, value]) => value === "true") // Filter only correct answers
-            .map(([key]) => key.replace("_correct", "")) // Extract the answer key
+            .filter(([key, value]) => value === "true") 
+            .map(([key]) => key.replace("_correct", "")) 
             .shift();
     }
 
@@ -50,8 +51,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 checkAnswer(correctAnswer, null);
 
-                // jeda buat animasi benar/salah
-                setTimeout(nextQuestion, 3000);
+                // jeda buat animasi benar/salah pas waktu 10 detik abis
+                // setTimeout(nextQuestion, 3000);
             }
         }, 1000);
     }
@@ -86,9 +87,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 checkAnswer(correctAnswer, userAnswer);
 
                 clearInterval(countdown); 
-
-                // jeda buat animasi benar/salah
-                setTimeout(nextQuestion, 3000);
+                
+                // jeda buat animasi benar/salah pas jawab
+                // setTimeout(nextQuestion, 3000);
+                nextQuestion();
             });
         });
     }
@@ -97,6 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (correctAnswer === userAnswer) {
             alert("Benar");
         } else {
+            falseAnswerCount++;
             alert(`Salah, jawaban benar ${correctAnswer}`);
         }
     }
@@ -107,8 +110,20 @@ document.addEventListener("DOMContentLoaded", function () {
             currentQuestionIndex++;
             displayQuestion(questions[currentQuestionIndex]);
         } else {
-            // push user id, new generated quiz id, score, jawaban benar, questions, selected answer, time generated
-            quizContainer.innerHTML = "<p>Quiz Completed!</p>";
+            const userId = window.Laravel.user_id;
+            const score = ((questions.length - falseAnswerCount) / questions.length) * 100;
+            quizContainer.innerHTML = `<p>Quiz Completed! Score :</p> ${score}`;
+            fetch('/quiz/store', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    score: score
+                })
+            });
         }
     }
 

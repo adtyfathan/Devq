@@ -18,32 +18,29 @@ class AuthController extends Controller
     }
     
     public function login(Request $request){
-        // ✅ Validate input
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
-        // ✅ Check if user exists
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
             return back()->withErrors(['email' => 'Akun tidak ditemukan'])->onlyInput('email');
         }
 
-        // ✅ Attempt login
         if (!Auth::attempt(['email' => $request->email, 'password' => $request->password], $request->filled('remember'))) {
             return back()->withErrors(['password' => 'Password salah'])->onlyInput('email');
         }
 
-        // ✅ Secure session
         $request->session()->regenerate();
+
+        $request->session()->put('user_id', Auth::id());
 
         return redirect()->intended('/');
     }
 
     public function register(Request $request){
-        // ✅ Validate user input with optimized rules
         $validated = $request->validate([
         'name' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users,email',
@@ -60,29 +57,26 @@ class AuthController extends Controller
             'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, and one number.'
         ]);
 
-        // ✅ Securely hash password before storing
         $validated['password'] = Hash::make($validated['password']);
 
-        // ✅ Create and login user in a single step
         $user = User::create($validated);
         Auth::login($user);
 
-        // ✅ Regenerate session for security (session fixation protection)
         $request->session()->regenerate();
 
-        // ✅ Redirect securely to intended route
+        $request->session()->put('user_id', $user->id);
+
         return redirect()->intended('/');
     }
 
 
     public function logout(Request $request)
     {
-        Auth::logout(); // ✅ Log out the user
+        Auth::logout(); 
 
-        $request->session()->invalidate(); // ✅ Invalidate session
-        $request->session()->regenerateToken(); // ✅ Prevent CSRF attacks
-
-        return redirect('/login'); // ✅ Redirect to login page
+        $request->session()->invalidate(); 
+        $request->session()->regenerateToken(); 
+        return redirect('/login'); 
     }
 
 }

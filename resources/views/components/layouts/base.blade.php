@@ -16,6 +16,9 @@
 
 <body>
     {{ $slot }}
+    <script>
+        window.Laravel = {!! json_encode(['user_id' => session('user_id')]) !!};
+    </script>
     @vite(['resources/js/app.js'])
     @stack('js')
 </body>
