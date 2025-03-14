@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentQuestionIndex = 0;
     let countdown;
     let timeLeft = 10;
-    let selectedAnswer = [];
+    let userAnswers = [];
     let falseAnswerCount = 0;
 
     const quizContainer = document.getElementById("quiz-container");
@@ -75,8 +75,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.querySelectorAll(".answer-option").forEach(option => {
             option.addEventListener("change", function () {
-                selectedAnswer[currentQuestionIndex] = this.value
-
                 const correctAnswer = getCorrectAnswers(questions[currentQuestionIndex].correct_answers);
                 const userAnswer = this.value;
 
@@ -85,6 +83,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
 
                 checkAnswer(correctAnswer, userAnswer);
+
+                userAnswers.push({
+                    question_id: questions[currentQuestionIndex].id,
+                    answer: userAnswer
+                });
 
                 clearInterval(countdown); 
                 
@@ -121,7 +124,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 body: JSON.stringify({
                     user_id: userId,
-                    score: score
+                    score: score,
+                    category: category,
+                    difficulty: difficulty,
+                    user_answer: userAnswers
                 })
             });
         }

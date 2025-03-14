@@ -9,14 +9,20 @@ class Quiz extends Model
 {
      use HasFactory;
 
+    protected $guarded = [];
+
     protected $fillable = [
         'user_id',
         'score',
         'completed_at',
+        'category',
+        'difficulty',
+        'user_answer'
     ];
 
     protected $casts = [
         'completed_at' => 'datetime',
+        'user_answer' => 'array'
     ];
 
     public function user()

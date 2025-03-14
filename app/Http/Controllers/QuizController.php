@@ -12,12 +12,18 @@ class QuizController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'score' => 'required|integer|min:0',
+            'category' => 'required|string',
+            'difficulty' => 'required|string',
+            'user_answer' => 'required|array'
         ]);
 
         $quiz = Quiz::create([
            'user_id' => $validated['user_id'],
            'score' => $validated['score'],
-           'completed_at' => Carbon::now()
+           'category' => $validated['category'],
+           'completed_at' => Carbon::now(),
+           'difficulty' => $validated['difficulty'],
+           'user_answer' => $validated['user_answer']
         ]);
 
         return response()->json($quiz, 201);
