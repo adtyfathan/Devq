@@ -9,12 +9,22 @@ class Question extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-    
-    protected $fillable = ['id', 'question', 'description', 'answers', 'correct_answer'];
-    
-    protected $casts = [
-        'answers' => 'array',
+    protected $fillable = [
+        'question',
+        'description',
+        'answers',
+        'correct_answer',
     ];
 
+    protected $casts = [
+        'answers' => 'array', // Store JSON as an array
+    ];
+
+    /**
+     * The quizzes that include this question.
+     */
+    public function quizzes()
+    {
+        return $this->belongsToMany(Quiz::class, 'quiz_question')->withTimestamps();
+    }
 }
