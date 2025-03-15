@@ -9,6 +9,8 @@ class Question extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $fillable = [
         'question',
         'description',
@@ -25,6 +27,6 @@ class Question extends Model
      */
     public function quizzes()
     {
-        return $this->belongsToMany(Quiz::class, 'quiz_question')->withTimestamps();
+        return $this->belongsToMany(Quiz::class, 'quiz_questions')->withTimestamps();
     }
 }

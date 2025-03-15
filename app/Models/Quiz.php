@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\QuizQuestion; 
+use App\Models\Question;
 
 class Quiz extends Model
 {
