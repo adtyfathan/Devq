@@ -12,9 +12,10 @@ class Question extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'id',
         'question',
         'description',
-        'answers',
+        'answers', 
         'correct_answer',
     ];
 

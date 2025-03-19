@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use App\Models\Question;
+use Illuminate\Support\Facades\Log;
 
 class FetchQuizQuestions extends Command
 {
@@ -13,10 +14,12 @@ class FetchQuizQuestions extends Command
 
     public function handle()
     {
-        $apiKey = env('QUIZ_API_KEY'); 
-        $url = "https://quizapi.io/api/v1/questions?apiKey={$apiKey}";
+        $apiUrl = config('services.quizapi.url');
+        $apiKey = config('services.quizapi.key');
 
-        $response = Http::get($url);
+        $response = Http::withHeaders([
+            'X-Api-Key' => $apiKey,
+        ])->get($apiUrl);
 
         if ($response->successful()) {
             $questions = $response->json();
@@ -33,9 +36,15 @@ class FetchQuizQuestions extends Command
             }
             $this->info('Questions fetched and stored successfully!');
         } else {
-            $this->error('Failed to fetch questions.');
+            // Log the response status and error details
+            $errorMessage = $response->body(); // Get the full error response
+            Log::error("API Request Failed: {$response->status()} - {$errorMessage}");
+            
+            $this->error("Failed to fetch questions. Status: {$response->status()}");
+            $this->error("Error Details: {$errorMessage}");
         }
     }
+
 
     private function getCorrectAnswerIndex($correct_answers)
     {
