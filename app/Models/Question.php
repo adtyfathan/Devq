@@ -14,20 +14,23 @@ class Question extends Model
     protected $fillable = [
         'id',
         'question',
+        'category',
+        'difficulty',
         'description',
         'answers', 
-        'correct_answer',
+        'correct_answers',
+        'explanation'
+        
     ];
 
     protected $casts = [
-        'answers' => 'array', // Store JSON as an array
+        'answers' => 'array', 
+        'correct_answers' => 'array'
     ];
 
-    /**
-     * The quizzes that include this question.
-     */
     public function quizzes()
     {
-        return $this->belongsToMany(Quiz::class, 'quiz_questions')->withTimestamps();
+        return $this->belongsToMany(Quiz::class, 'quiz_questions')
+                    ->withTimestamps();
     }
 }

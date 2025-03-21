@@ -127,7 +127,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     score: score,
                     category: category,
                     difficulty: difficulty,
-                    user_answer: userAnswers
+                    user_answer: userAnswers,
+                    questions: questions
+                    // question_id, question_question, question_desc
                 })
             });
         }
