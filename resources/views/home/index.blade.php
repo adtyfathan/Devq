@@ -1,5 +1,6 @@
 <x-layouts.app title="Home">
     <main>
+        @vite(['resources/css/home.css'])
         <h1>DevQ</h1>
 
         <div class="quiz-cards">
@@ -46,13 +47,7 @@
             @csrf
             <button type="submit">Logout</button>
         </form>
+
+        @vite(['resources/js/home.js'])
     </main>
 </x-layouts.app>
-
-@push('css')
-    @vite(['resources/css/home.css'])
-@endpush
-
-@push('js')
-    @vite(['resources/css/home.js'])
-@endpush
