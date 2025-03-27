@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function(){
-    const userId = window.Laravel.user_id
+    const userId = window.Laravel.user_id;
+    console.log(userId)
 
     const titleText = document.getElementById("title");
     const nameInput = document.getElementById("name");

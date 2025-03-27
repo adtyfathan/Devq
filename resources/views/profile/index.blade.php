@@ -1,4 +1,4 @@
-<x-layouts.app title="Home">
+<x-layouts.app title="Profile">
     <main>
         @vite(['resources/css/profile.css'])
 
@@ -18,6 +18,7 @@
             <input type="submit">
         </form>
 
+        <a href="{{ route('quiz.history') }}">Quiz History</a>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf
