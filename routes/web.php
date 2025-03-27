@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::get('/api/questions', [WebQuizController::class, 'getQuestions'])->name('quiz.api');
+Route::get('/api/questions', [QuizController::class, 'getQuestions'])->name('quiz.api');
 
 // ✅ Fallback Route (Handles 404 errors)
 Route::fallback([FallbackController::class, 'index'])->name('404');
