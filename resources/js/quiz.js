@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const userId = window.Laravel.user_id;
             const score = ((questions.length - falseAnswerCount) / questions.length) * 100;
             quizContainer.innerHTML = `<p>Quiz Completed! Score :</p> ${score}`;
-            fetch('/quiz/store', {
+            fetch('/api/quiz/store', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -131,7 +131,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     questions: questions
                     // question_id, question_question, question_desc
                 })
-            });
+            })
+                .then(response => response.json())
+                .then(data => {
+                    setTimeout(() => {
+                        window.location.href = `/summary?id=${data.id}`;
+                    }, 5000);
+                })
         }
     }
 

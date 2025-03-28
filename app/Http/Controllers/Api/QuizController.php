@@ -40,24 +40,4 @@ class QuizController extends Controller
 
         return response()->json(["questions" => $questions]);
     }
-
-    public function getNextQuestion(Request $request)
-    {
-        if (!session()->has('questions')) {
-            return response()->json(["error" => "No quiz found. Please start again."], 400);
-        }
-        
-        $questions = session('questions', []);
-        $index = session('index', 0);
-
-        if (empty($questions) || $index >= count($questions)) {
-            return response()->json(["question" => null]);
-        }
-
-        $question = $questions[$index];
-
-        session(['index' => $index + 1]);
-
-        return response()->json(["question" => $question]);
-    }
 }

@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const historyWrapper = document.getElementById("history-wrapper");
 
     function fetchHistory() {
-        fetch(`/profile/user/history/${userId}`, {
+        fetch(`/api/history/${userId}`, {
             method: "GET",
             headers: {
                 'Content-Type': 'application/json',
@@ -11,18 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         })
             .then(response => response.json())
-            .then(data => {
-                console.log(data)
-                data.forEach(quiz => {
-                    historyWrapper.innerHTML += `
-                        <div class="history-container">
-                            <h1>${quiz.difficulty} ${quiz.category} Quiz</h1>
-                            <p>${formatDate(quiz.completed_at)}</p>
-                            <p>Score: ${quiz.score}/100</p>
-                        </div>
-                    `;
-                });
-            })
+            .then(data => displayHistory(data))
             .catch(error => {
                 console.error("Error fetching data:", error);
             });
@@ -47,6 +36,19 @@ document.addEventListener("DOMContentLoaded", function () {
         const finalDate = formattedTime + " " + formattedDate;
 
         return finalDate;
+    }
+
+    function displayHistory(quizzes){
+        quizzes.forEach(quiz => {
+            historyWrapper.innerHTML += `
+                <div class="history-container">
+                    <h1>${quiz.difficulty} ${quiz.category} Quiz</h1>
+                    <p>${formatDate(quiz.completed_at)}</p>
+                    <p>Score: ${quiz.score}/100</p>
+                    <a href="/summary?id=${quiz.id}">Detail</a>
+                </div>
+            `;
+        });
     }
 
     fetchHistory();
