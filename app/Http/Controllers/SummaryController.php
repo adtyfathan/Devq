@@ -16,14 +16,4 @@ class SummaryController extends Controller
         
         return view('quiz.summary');
     }
-
-    public function getSummary($id){ 
-        $summary = Quiz::find($id);
-
-        if (!$summary) {
-            return response()->json(['error' => 'No summary found'], 404);
-        }
-
-        return response()->json($summary, 200);
-    }
 }

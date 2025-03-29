@@ -1,0 +1,15 @@
+.correct-container {
+    background-color: cyan;
+}
+
+.wrong-container {
+    background-color: pink;
+}
+
+.correct-answer {
+    color: green;
+}
+
+.user-answer {
+    color: orange;
+}

@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function fetchQuiz() {
-        fetch(`/api/summary/${quizId}`) 
+        fetch(`/api/quiz/${quizId}`) 
             .then(response => response.json())
             .then(data => {
                 displaySummary(data);
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <h1>${quiz.difficulty} ${quiz.category} Quiz</h1>
             <p>${formatDate(quiz.completed_at)}</p>
             <p>score :${quiz.score}/100</p>
-            <a href="">Review</a>
+            <a href="/review?id=${quiz.id}">Review</a>
         `;
     }
 

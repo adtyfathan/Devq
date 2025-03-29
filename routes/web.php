@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FallbackController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +31,8 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/quiz/{category}', [QuizController::class, 'showQuiz'])->name('quiz.show');
     
+    Route::get('/review', [ReviewController::class, 'index'])->name('review.show');
+
     Route::prefix('profile')->group(function () {
         Route::get('/', [ProfileController::class, 'index'])->name('profile');
         Route::get('/history', [ProfileController::class, 'showHistory'])->name('quiz.history');
@@ -36,10 +40,11 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::prefix('api')->group(function(){
+    Route::get('/quiz/{id}', [WebQuizController::class, "getQuizById"]);
+    Route::get('/question/{id}', [QuestionController::class, 'getQuestionById']);
     Route::get('/questions', [QuizController::class, 'getQuestions']);
     Route::post('/quiz/store', [WebQuizController::class, 'store']);
     Route::get('/history/{user_id}', [WebQuizController::class, 'getQuizByUserId']);
-    Route::get('/summary/{id}', [SummaryController::class, "getSummary"]);
 });
 
 // ✅ Fallback Route (Handles 404 errors)
