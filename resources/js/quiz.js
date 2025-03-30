@@ -21,11 +21,12 @@ document.addEventListener("DOMContentLoaded", function () {
             .shift();
     }
 
-    function fetchQuestions() {
+    function fetchQuestions() { // aman
         fetch(`/api/questions?category=${category}&difficulty=${difficulty}&limit=${limit}`)
             .then(response => response.json())
             .then(data => {
                 questions = data.questions;
+                console.log(questions)
                 if (questions.length > 0) {
                     displayQuestion(questions[currentQuestionIndex]);
                 } else {
@@ -51,6 +52,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 checkAnswer(correctAnswer, null);
 
+                // nextQuestion()
+
                 // jeda buat animasi benar/salah pas waktu 10 detik abis
                 // setTimeout(nextQuestion, 3000);
             }
@@ -74,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
         startTimer();
 
         document.querySelectorAll(".answer-option").forEach(option => {
-            option.addEventListener("change", function () {
+            option.addEventListener("change", function () { // aman
                 const correctAnswer = getCorrectAnswers(questions[currentQuestionIndex].correct_answers);
                 const userAnswer = this.value;
 
@@ -129,15 +132,19 @@ document.addEventListener("DOMContentLoaded", function () {
                     difficulty: difficulty,
                     user_answer: userAnswers,
                     questions: questions
-                    // question_id, question_question, question_desc
                 })
             })
                 .then(response => response.json())
                 .then(data => {
-                    setTimeout(() => {
-                        window.location.href = `/summary?id=${data.id}`;
-                    }, 5000);
+                    if (data.id) {
+                        setTimeout(() => {
+                            window.location.href = `/summary?id=${data.id}`;
+                        }, 5000);
+                    } else {
+                        console.error("Quiz ID not returned:", data);
+                    }
                 })
+                .catch(error => console.error('Error:', error));
         }
     }
 

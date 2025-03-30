@@ -43,7 +43,7 @@ Route::prefix('api')->group(function(){
     Route::get('/quiz/{id}', [WebQuizController::class, "getQuizById"]);
     Route::get('/question/{id}', [QuestionController::class, 'getQuestionById']);
     Route::get('/questions', [QuizController::class, 'getQuestions']);
-    Route::post('/quiz/store', [WebQuizController::class, 'store']);
+    Route::post('/quiz/store', [WebQuizController::class, 'storeQuiz']);
     Route::get('/history/{user_id}', [WebQuizController::class, 'getQuizByUserId']);
 });
 
