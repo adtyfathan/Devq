@@ -8,21 +8,14 @@ document.addEventListener("DOMContentLoaded", function(){
         return;
     }
 
-    function fetchQuiz(){
-        fetch(`/api/quiz/${quizId}`)
+    function fetchReview(){
+        fetch(`/api/review/${quizId}`)
             .then(response => response.json())
-            .then(quiz => {
-                let answers = JSON.parse(quiz.user_answer);
-                answers.forEach(answer => {
-                    // string
-                    const userAnswer = answer.answer;
-                    
-                    fetch(`/api/question/${answer.question_id}`)
-                        .then(response => response.json())
-                        .then(question => {
-                            displayQuestion(question, userAnswer);
-                        })
-                        .catch(error => console.error("Error fetching question:", error));
+            .then(review => {
+                const questions = review.questions
+
+                questions.forEach(question => {
+                    displayQuestion(question, question.user_answer)
                 });
             })
             .catch(error => console.error("Error fetching quiz:", error));
@@ -95,5 +88,5 @@ document.addEventListener("DOMContentLoaded", function(){
         }
     }
 
-    fetchQuiz();
+    fetchReview();
 });

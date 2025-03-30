@@ -45,6 +45,7 @@ Route::prefix('api')->group(function(){
     Route::get('/questions', [QuizController::class, 'getQuestions']);
     Route::post('/quiz/store', [WebQuizController::class, 'storeQuiz']);
     Route::get('/history/{user_id}', [WebQuizController::class, 'getQuizByUserId']);
+    Route::get('/review/{id}', [ReviewController::class, 'getQuizReview']);
 });
 
 // ✅ Fallback Route (Handles 404 errors)

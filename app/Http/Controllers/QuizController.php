@@ -8,11 +8,15 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
 class QuizController extends Controller
 {
     public function storeQuiz(Request $request)
     {
         try {
+            DB::beginTransaction();
+            
             $validated = $request->validate([
                 'user_id' => 'required|exists:users,id',
                 'score' => 'required|numeric|min:0|max:100',
@@ -22,10 +26,14 @@ class QuizController extends Controller
                 'questions' => 'required|array'
             ]);
 
-            Log::info('Validation passed', ['validated' => $validated]);
+            if (count($validated['user_answer']) !== count($validated['questions'])) {
+                return response()->json(['error' => 'Mismatched question and answer count'], 400);
+            }
+            
+            $questionIds = [];
             
             foreach ($validated['questions'] as $question){
-                $question = Question::firstOrCreate(
+                Question::firstOrCreate(
                   ['id' => $question['id']],
                    [
                     'question' => $question['question'],
@@ -35,8 +43,9 @@ class QuizController extends Controller
                     'answers' => json_encode($question['answers']),
                     'correct_answers' => json_encode($question['correct_answers']),
                     'explanation' => $question['explanation']
-                ]
+                    ]
                 );
+                array_push($questionIds, $question['id']);
             }
             
             $quiz = Quiz::create([
@@ -44,28 +53,19 @@ class QuizController extends Controller
                 'score' => $validated['score'],
                 'category' => $validated['category'],
                 'completed_at' => Carbon::now(),
-                'difficulty' => $validated['difficulty'],
-                'user_answer' => json_encode($validated['user_answer']),
+                'difficulty' => $validated['difficulty']
             ]);
 
-            Log::info('Quiz saved', ['quiz' => $quiz]);
-
-
-            foreach ($validated['user_answer'] as $answer) {
-                if (!isset($answer['question_id'])) {
-                    Log::error('Missing question_id', ['answer' => $answer]);
-                    return response()->json(['error' => 'Invalid user_answer format'], 400);
-                }
-
-                Log::info('Attaching question', ['question_id' => $answer['question_id']]);
-                $quiz->questions()->attach($answer['question_id']);
+            for($i = 0; $i < count($validated['user_answer']); $i++){
+                $quiz->questions()->attach($questionIds[$i], ['user_answer' => $validated['user_answer'][$i]]);
             }
 
-            Log::info('All questions attached successfully');
+            DB::commit();
 
             return response()->json(['id' => $quiz->id], 201);
 
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error('Error in store method', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
         }
@@ -101,5 +101,3 @@ class QuizController extends Controller
         }
     }
 }
-
-// 0 1 2 3 | 4
