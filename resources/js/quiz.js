@@ -26,7 +26,6 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => response.json())
             .then(data => {
                 questions = data.questions;
-                console.log(questions)
                 if (questions.length > 0) {
                     displayQuestion(questions[currentQuestionIndex]);
                 } else {
@@ -87,10 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 checkAnswer(correctAnswer, userAnswer);
 
-                userAnswers.push({
-                    question_id: questions[currentQuestionIndex].id,
-                    answer: userAnswer
-                });
+                userAnswers.push(userAnswer);
 
                 clearInterval(countdown); 
                 
