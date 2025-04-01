@@ -35,7 +35,13 @@ class Quiz extends Model
     public function questions()
     {
         return $this->belongsToMany(Question::class, 'quiz_questions')
+                    ->withPivot(['user_answer'])
                     ->withTimestamps();
+    }
+
+    public function multiplayerSessions()
+    {
+        return $this->hasMany(MultiplayerSession::class);
     }
 }
 

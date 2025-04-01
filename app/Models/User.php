@@ -9,7 +9,6 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     protected $fillable = [
@@ -34,6 +33,18 @@ class User extends Authenticatable
     public function quizzes()
     {
         return $this->hasMany(Quiz::class);
+    }
+
+    public function hostedSessions()
+    {
+        return $this->hasMany(MultiplayerSession::class, 'host_id');
+    }
+
+    public function multiplayerSessions()
+    {
+        return $this->belongsToMany(MultiplayerSession::class, 'multiplayer_user')
+                    ->withPivot(['username', 'point', 'joined_at', 'completed_at'])
+                    ->withTimestamps();
     }
 }
 

@@ -13,6 +13,8 @@ class MultiplayerSession extends Model
 
     protected $fillable = ['host_id', 'quiz_id', 'session_code', 'status', 'started_at', 'ended_at'];
 
+    protected $casts = ['started_at' => 'datetime', 'ended_at' => 'datetime'];
+    
     public function host()
     {
         return $this->belongsTo(User::class, 'host_id');
@@ -23,8 +25,10 @@ class MultiplayerSession extends Model
         return $this->belongsTo(Quiz::class, 'quiz_id');
     }
 
-    public function players()
+    public function users()
     {
-        return $this->hasMany(MultiplayerUser::class, 'multiplayer_session_id');
+        return $this->belongsToMany(User::class, 'multiplayer_user')
+                    ->withPivot(['username', 'point', 'joined_at', 'completed_at'])
+                    ->withTimestamps();
     }
 }

@@ -31,6 +31,7 @@ class Question extends Model
     public function quizzes()
     {
         return $this->belongsToMany(Quiz::class, 'quiz_questions')
+                    ->withPivot(['user_answer'])
                     ->withTimestamps();
     }
 }
