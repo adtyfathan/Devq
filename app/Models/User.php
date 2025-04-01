@@ -36,3 +36,19 @@ class User extends Authenticatable
         return $this->hasMany(Quiz::class);
     }
 }
+
+// use Illuminate\Database\Eloquent\Relations\HasMany;
+// use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+// use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
+// public function createdQuizzes(): HasMany
+// {
+//     return $this->hasMany(Quiz::class, 'user_id');
+// }
+
+// public function playedQuizzes(): BelongsToMany
+// {
+//     return $this->belongsToMany(Quiz::class, 'multiplayer_user', 'user_id', 'multiplayer_session_id')
+//         ->withPivot('joined_at', 'completed_at', 'point')
+//         ->withTimestamps();
+// }
