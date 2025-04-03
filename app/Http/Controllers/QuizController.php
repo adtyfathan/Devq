@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MultiplayerSession;
 use App\Models\Question;
 use App\Models\Quiz;
 use Carbon\Carbon;
@@ -12,6 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class QuizController extends Controller
 {
+    public function createQuizView(){
+        return view('quiz.create');
+    }
+
     public function storeQuiz(Request $request)
     {
         try {

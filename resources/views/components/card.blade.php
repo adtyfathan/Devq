@@ -1,10 +1,10 @@
-@props(['category' => null, 'img' => NULL])
+@props(['category' => null, 'img' => null, 'route' => null])
 
 <div class="quiz-card">
     <img src="{{ $img }}" />
-    <form action="{{ route('quiz.show', ['category' => $category]) }}" method="GET">
+    <form action="{{ $route ? route($route, ['category' => $category]) : '#' }}" method="GET">
         <h1>{{ $category }} Quiz</h1>
-        
+
         <p>Select difficulty</p>
         <input type="radio" id="easy" name="difficulty" value="easy">
         <label for="easy">Easy</label>

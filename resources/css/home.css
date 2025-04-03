@@ -18,3 +18,8 @@
     width: 200px;
 }
 
+#error-message {
+    color: red;
+    display: none;
+}
+

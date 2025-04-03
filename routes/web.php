@@ -5,6 +5,7 @@ use App\Http\Controllers\QuizController as WebQuizController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FallbackController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MultiplayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ReviewController;
@@ -29,7 +30,15 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/summary', [SummaryController::class, 'index'])->name("summary.show");
     
+    Route::get('/create/quiz', [WebQuizController::class, 'createQuizView'])->name('quiz.create');
+
     Route::get('/quiz/{category}', [QuizController::class, 'showQuiz'])->name('quiz.show');
+    
+    
+    Route::get('/multiplayer/host/{category}', [MultiplayerController::class, 'showHostView'])->name('quiz.host');
+
+    Route::get('/multiplayer/player/{lobby_id}', [MultiplayerController::class, 'showPlayerView'])->name('quiz.player');
+    
     
     Route::get('/review', [ReviewController::class, 'index'])->name('review.show');
 
@@ -43,6 +52,10 @@ Route::prefix('api')->group(function(){
     Route::get('/quiz/{id}', [WebQuizController::class, "getQuizById"]);
     Route::get('/question/{id}', [QuestionController::class, 'getQuestionById']);
     Route::get('/questions', [QuizController::class, 'getQuestions']);
+    
+    Route::post('/multiplayer/host', [MultiplayerController::class, 'createLobby']);
+    Route::get('/multiplayer/lobby/{lobby_id}', [MultiplayerController::class, 'getLobbyDetail']);
+   
     Route::post('/quiz/store', [WebQuizController::class, 'storeQuiz']);
     Route::get('/history/{user_id}', [WebQuizController::class, 'getQuizByUserId']);
     Route::get('/review/{id}', [ReviewController::class, 'getQuizReview']);
