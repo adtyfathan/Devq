@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 class MultiplayerController extends Controller
 {
     public function createLobby(Request $request){
-        $hasil = "halo " . $request->input('host_id');
-
-        return response()->json(['message' => $hasil]);
+       
     }
 
     public function showHostView(Request $request, $category){       

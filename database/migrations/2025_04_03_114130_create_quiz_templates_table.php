@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('quiz_questions', function (Blueprint $table) {
-            // $table->integer("point")->default(0)->after("password");
-            $table->string("user_answer")->after("question_id");
+        Schema::create('quiz_templates', function (Blueprint $table) {
+            $table->id();
+            $table->string("category");
+            $table->string("difficulty");
+            $table->timestamps();
         });
     }
 
@@ -22,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('quiz_questions', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('quiz_templates');
     }
 };

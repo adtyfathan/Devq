@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('quiz_questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('quiz_id')->constrained()->onDelete('cascade'); // References quizzes.id
-            $table->foreignId('question_id')->constrained()->onDelete('cascade'); // References questions.id
+            $table->foreignId('quiz_id')->nullable()->constrained()->onDelete('cascade'); 
+            $table->foreignId('question_id')->constrained()->onDelete('cascade'); 
+            $table->foreignId("template_id")->nullable()->constrained("quiz_templates")->onDelete('cascade'); 
+            $table->string("user_answer");
             $table->timestamps();
         });
     }
