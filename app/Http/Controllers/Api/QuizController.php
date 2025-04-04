@@ -26,10 +26,12 @@ class QuizController extends Controller
 
     // HAPUS SESSION PAS QUIZ SELESAI
     
-    public function getQuestions(Request $request)
+    public function getQuestions(Request $request, $category = null)
     {
-        $category = $request->query('category', null);
-        $difficulty = $request->query('difficulty', 'easy'); 
+        if (!$category) {
+            $category = $request->query('category', null);
+        }
+        $difficulty = $request->query('difficulty', 'hard'); 
         $limit = $request->query('limit', 10);
         
         if (!$category) {

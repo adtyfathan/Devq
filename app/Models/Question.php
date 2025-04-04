@@ -34,4 +34,11 @@ class Question extends Model
                     ->withPivot(['user_answer'])
                     ->withTimestamps();
     }
+
+    public function quizTemplate()
+    {
+        return $this->belongsToMany(MultiplayerSession::class, 'quiz_questions')
+                    ->withPivot(['user_answer'])
+                    ->withTimestamps();
+    }
 }

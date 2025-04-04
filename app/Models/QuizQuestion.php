@@ -14,9 +14,18 @@ class QuizQuestion extends Pivot
 
     protected $fillable = ['quiz_id', 'question_id', 'user_answer'];
 
+    protected $casts = [
+        'user_answer' => 'array'
+    ];
+
     public function quiz()
     {
         return $this->belongsTo(Quiz::class);
+    }
+
+    public function quizTemplate()
+    {
+        return $this->belongsTo(MultiplayerSession::class);
     }
 
     public function question()

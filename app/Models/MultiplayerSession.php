@@ -20,9 +20,9 @@ class MultiplayerSession extends Model
         return $this->belongsTo(User::class, 'host_id');
     }
 
-    public function quiz()
+    public function quizTemplate()
     {
-        return $this->belongsTo(Quiz::class, 'quiz_id');
+        return $this->belongsTo(MultiplayerSession::class, 'quiz_id');
     }
 
     public function users()

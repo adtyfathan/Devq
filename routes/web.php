@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SummaryController;
+use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,7 +54,9 @@ Route::prefix('api')->group(function(){
     Route::get('/question/{id}', [QuestionController::class, 'getQuestionById']);
     Route::get('/questions', [QuizController::class, 'getQuestions']);
     
-    Route::post('/multiplayer/host', [MultiplayerController::class, 'createLobby']);
+    Route::get('/multiplayer/host/{category}', [MultiplayerController::class, 'createLobby']);
+    Route::post('/template/store', [TemplateController::class, 'storeTemplate']);
+    
     Route::get('/multiplayer/lobby/{lobby_id}', [MultiplayerController::class, 'getLobbyDetail']);
    
     Route::post('/quiz/store', [WebQuizController::class, 'storeQuiz']);

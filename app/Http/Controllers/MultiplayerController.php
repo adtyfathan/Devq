@@ -3,12 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\MultiplayerSession;
+use App\Services\QuizService;
 use Illuminate\Http\Request;
 
 class MultiplayerController extends Controller
 {
-    public function createLobby(Request $request){
-       
+    protected $quizService;
+
+    public function __construct(QuizService $quizService){
+        $this->quizService = $quizService;
+    }
+    
+    public function createLobby(Request $request, $category){
+        $difficulty = $request->query('difficulty', 'hard');
+        $limit = $request->query('limit', 10);
+
+        $questions = $this->quizService->fetchQuestions($category, $difficulty, $limit);
+
+        // generate session code
+        return response()->json(['message' => 'Quiz template successfully created', 'questions' => $questions], 200);
     }
 
     public function showHostView(Request $request, $category){       
