@@ -16,6 +16,8 @@ class MultiplayerUser extends Pivot
 
     protected $casts = ['joined_at' => 'datetime', 'completed_at' => 'datetime'];
 
+    public $timestamps = false;
+    
     public function user()
     {
         return $this->belongsTo(User::class);

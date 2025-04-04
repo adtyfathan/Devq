@@ -1,21 +1,32 @@
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', async function(){
     const urlParams = new URLSearchParams(window.location.search);
     const category = window.location.pathname.split("/").pop();
     const difficulty = urlParams.get("difficulty") || "easy";
     const limit = urlParams.get("limit") || 5;
+    const userId = window.Laravel.user_id;
+    const codeDigitContainer = document.getElementById("code-text");
+    
 
-    getQuestions(category, difficulty, limit);
+    const questions = await getQuestions(category, difficulty, limit);
 
-    createTemplate(category, difficulty);
+    const template = await createTemplate(category, difficulty);
+    const templateId = template.data.id
+
+    // console.log(questions.data)
+
+    const session = await createSession(userId, templateId);
+    const sessionCode = session.data.session_code;
+
+    codeDigitContainer.textContent = `Your room code is: ${sessionCode}`;
 
     // bikin multiplayer session baru
 });
 
 async function getQuestions(category, difficulty, limit){
     try {
-        fetch(`/api/multiplayer/host/${category}?difficulty=${difficulty}&limit=${limit}`)
-            .then(response => response.json())
-            .then(data => console.log(data));
+        const response = await fetch(`/api/multiplayer/host/${category}?difficulty=${difficulty}&limit=${limit}`);
+        const data = await response.json();
+        return data;
     } catch(error){
         console.error("Error: ", error)
     }
@@ -23,7 +34,7 @@ async function getQuestions(category, difficulty, limit){
 
 async function createTemplate(category, difficulty){
     try {
-        fetch('/api/template/store', {
+        const response = await fetch('/api/template/store', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -33,11 +44,32 @@ async function createTemplate(category, difficulty){
                 category: category,
                 difficulty: difficulty
             })
-        }).then(response => response.json())
-            .then(data => console.log(data.message));
+        });
+        const data = await response.json();
+        return data; 
     } catch(error){
         console.error("Error: ", error)
     }
 }
 
+async function createSession(hostId, templateId){
+    try {
+        const response = await fetch('/api/multiplayer/session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                host_id: hostId,
+                quiz_id: templateId,
+                status: "waiting"
+            })
+        });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error: ", error)
+    }
+}
 

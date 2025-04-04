@@ -14,6 +14,8 @@ class MultiplayerSession extends Model
     protected $fillable = ['host_id', 'quiz_id', 'session_code', 'status', 'started_at', 'ended_at'];
 
     protected $casts = ['started_at' => 'datetime', 'ended_at' => 'datetime'];
+
+    public $timestamps = false;
     
     public function host()
     {

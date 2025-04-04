@@ -56,6 +56,7 @@ Route::prefix('api')->group(function(){
     
     Route::get('/multiplayer/host/{category}', [MultiplayerController::class, 'createLobby']);
     Route::post('/template/store', [TemplateController::class, 'storeTemplate']);
+    Route::post('/multiplayer/session', [MultiplayerController::class, 'createSession']);
     
     Route::get('/multiplayer/lobby/{lobby_id}', [MultiplayerController::class, 'getLobbyDetail']);
    

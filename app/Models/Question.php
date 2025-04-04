@@ -20,7 +20,6 @@ class Question extends Model
         'answers', 
         'correct_answers',
         'explanation'
-        
     ];
 
     protected $casts = [

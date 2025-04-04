@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MultiplayerSession;
 use App\Models\Question;
 use App\Models\Quiz;
 use Carbon\Carbon;
