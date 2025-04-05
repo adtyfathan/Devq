@@ -5,10 +5,13 @@
 
         <form id="multiplayer-form">
             <p id="error-message"></p>
-            <label for="quiz-id">Lobby Id</label>
+            
             {{-- max 6 digit --}}
-            <input type="number" name="quiz-id" id="lobby-input">
-            <input type="submit" value="Join">
+            <label for="username">Username</label>
+            <input type="text" name="username" id="lobby-username" />
+            <label for="quiz-id">Lobby Id</label>
+            <input type="number" name="quiz-id" id="lobby-input" />
+            <input type="submit" value="Join" />
         </form>
 
         <a href="{{ route('quiz.create') }}">create quiz</a>

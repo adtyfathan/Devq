@@ -2,6 +2,8 @@
 
 namespace App\Events;
 
+use App\Models\MultiplayerSession;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -17,7 +19,7 @@ class CreateMultiplayerLobby implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public function __construct(public MultiplayerSession $session, public User $host, public User $player)
     {
         //
     }
@@ -27,10 +29,8 @@ class CreateMultiplayerLobby implements ShouldBroadcast
      *
      * @return array<int, \Illuminate\Broadcasting\Channel>
      */
-    public function broadcastOn(): array
+    public function broadcastOn(): Channel
     {
-        return [
-            new PrivateChannel('channel-name'),
-        ];
+        return new PrivateChannel("multiplayer.{$this->host->id}");
     }
 }

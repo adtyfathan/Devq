@@ -19,7 +19,10 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     codeDigitContainer.textContent = `Your room code is: ${sessionCode}`;
 
-    // bikin multiplayer session baru
+    Echo.private(`multiplayer.${userId}`)
+        .listen('CreateMultiplayerLobby', (event) => {
+            console.log(event)
+        })
 });
 
 async function getQuestions(category, difficulty, limit){
@@ -69,7 +72,11 @@ async function createSession(hostId, templateId){
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error("Error: ", error)
+        console.error("Error: ", error);
     }
+}
+
+async function addPlayerToLobby(){
+    // add table multiplayer user pas player join
 }
 
