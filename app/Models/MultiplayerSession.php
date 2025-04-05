@@ -30,7 +30,6 @@ class MultiplayerSession extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'multiplayer_user')
-                    ->withPivot(['username', 'point', 'joined_at', 'completed_at'])
-                    ->withTimestamps();
+                    ->withPivot(['username', 'point', 'joined_at', 'completed_at']);
     }
 }

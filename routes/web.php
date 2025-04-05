@@ -59,7 +59,12 @@ Route::prefix('api')->group(function(){
     Route::post('/multiplayer/session', [MultiplayerController::class, 'createSession']);
     
     Route::get('/multiplayer/lobby/{lobby_id}', [MultiplayerController::class, 'getLobbyDetail']);
-   
+    Route::post('/multiplayer/add-player', [MultiplayerController::class, 'addPlayerToLobby']);
+    
+    Route::post('/multiplayer/add-session-player', [MultiplayerController::class, 'createMultiplayerUser']);
+    
+    Route::get('/multiplayer/get-session-by-code/{session_code}', [MultiplayerController::class, 'getSessionIdBySessionCode']);
+    
     Route::post('/quiz/store', [WebQuizController::class, 'storeQuiz']);
     Route::get('/history/{user_id}', [WebQuizController::class, 'getQuizByUserId']);
     Route::get('/review/{id}', [ReviewController::class, 'getQuizReview']);
