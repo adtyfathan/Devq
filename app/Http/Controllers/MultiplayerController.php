@@ -95,12 +95,14 @@ class MultiplayerController extends Controller
         return response()->json(['message' => 'Player added succesfully'], 201);
     }
 
-    public function showHostView(Request $request, $category){   
-        // if(!sessionCode in MultiplayerSession) 
-        $difficulty = $request->query('difficulty', 'easy'); 
-        $limit = $request->query('limit', 10); 
+    public function showHostView($sessionCode){   
+        $session = MultiplayerSession::where('session_code', '=', $sessionCode)->first();
         
-        return view('quiz.lobby-host', compact('category', 'difficulty', 'limit'));
+        if(!$session){
+            return view('404', ['error' => 'Session not found']);
+        }
+        
+        return view('quiz.lobby-host');
     }
 
 

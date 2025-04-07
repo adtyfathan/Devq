@@ -36,9 +36,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/quiz/{category}', [QuizController::class, 'showQuiz'])->name('quiz.show');
     
     
-    Route::get('/multiplayer/host/{category}', [MultiplayerController::class, 'showHostView'])->name('quiz.host');
+    Route::get('/multiplayer/host/{session_code}', [MultiplayerController::class, 'showHostView'])->name('quiz.host');
 
-    Route::get('/multiplayer/player/{lobby_id}', [MultiplayerController::class, 'showPlayerView'])->name('quiz.player');
+    Route::get('/multiplayer/player/{session_code}', [MultiplayerController::class, 'showPlayerView'])->name('quiz.player');
     
     
     Route::get('/review', [ReviewController::class, 'index'])->name('review.show');
@@ -56,8 +56,9 @@ Route::prefix('api')->group(function(){
     
     Route::get('/multiplayer/host/{category}', [MultiplayerController::class, 'createLobby']);
     Route::post('/template/store', [TemplateController::class, 'storeTemplate']);
+    // 
     Route::post('/multiplayer/session', [MultiplayerController::class, 'createSession']);
-    
+    // 
     Route::get('/multiplayer/lobby/{lobby_id}', [MultiplayerController::class, 'getLobbyDetail']);
     
     Route::post('/multiplayer/add-session-player', [MultiplayerController::class, 'createMultiplayerUser']);
