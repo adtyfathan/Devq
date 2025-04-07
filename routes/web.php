@@ -59,7 +59,6 @@ Route::prefix('api')->group(function(){
     Route::post('/multiplayer/session', [MultiplayerController::class, 'createSession']);
     
     Route::get('/multiplayer/lobby/{lobby_id}', [MultiplayerController::class, 'getLobbyDetail']);
-    Route::post('/multiplayer/add-player', [MultiplayerController::class, 'addPlayerToLobby']);
     
     Route::post('/multiplayer/add-session-player', [MultiplayerController::class, 'createMultiplayerUser']);
     

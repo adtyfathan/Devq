@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', async function(){
     const userId = window.Laravel.user_id;
     const codeDigitContainer = document.getElementById("code-text");
     
-
     const questions = await getQuestions(category, difficulty, limit);
 
     const template = await createTemplate(category, difficulty);
@@ -19,6 +18,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     codeDigitContainer.textContent = `Your room code is: ${sessionCode}`;
 
+    
     Echo.private(`multiplayer.${userId}`)
         .listen('CreateMultiplayerLobby', (event) => {
             console.log(event)

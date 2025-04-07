@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\CreateMultiplayerLobby;
 use App\Models\MultiplayerSession;
+use App\Models\MultiplayerUser;
 use App\Models\User;
 use App\Services\QuizService;
 use Exception;
@@ -26,7 +27,6 @@ class MultiplayerController extends Controller
 
         $questions = $this->quizService->fetchQuestions($category, $difficulty, $limit);
 
-        // generate session code
         return response()->json(['message' => 'Quiz template successfully created', 'questions' => $questions], 200);
     }
 
@@ -58,22 +58,6 @@ class MultiplayerController extends Controller
         }
     }
 
-    public function addPlayerToLobby(Request $request){
-        $validated = $request->validate([
-            'session_id' => 'required|exists:multiplayer_session,id',
-            'host_id' => 'required|exists:users,id',
-            'user_id' => 'required|exists:users,id'
-        ]);
-        
-        $session = MultiplayerSession::find($validated['session_id']);
-        $host = User::find($validated['host_id']);
-        $player = User::find($validated['user_id']);
-
-        broadcast(new CreateMultiplayerLobby($session, $host, $player));
-
-        return response()->json(['message' => 'Player successfully added'], 201);
-    }
-
     public function updateSessionState(){
         // start_at quiz pas quiz mulai by host
         // ended_at quiz pas session code quiz berakhir
@@ -86,14 +70,27 @@ class MultiplayerController extends Controller
             'username' => 'required'
         ]);
 
-        $sessionUser = MultiplayerSession::findOrFail($validated['session_id']);
+        // session
+        $session = MultiplayerSession::findOrFail($validated['session_id']);
+
+        // host
+        $hostId = $session->host_id;
+        $host = User::find($hostId);
+
         $user = User::findOrFail($validated['player_id']);
 
-        $sessionUser->users()->attach($user->id, [
+        $session->users()->attach($user->id, [
             'username' => $validated['username'],
             'point' => 0,
             'joined_at' => Carbon::now()
         ]);
+
+        // player
+        $player = MultiplayerUser::where('multiplayer_session_id', $session->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        broadcast(new CreateMultiplayerLobby($session, $host, $player));
 
         return response()->json(['message' => 'Player added succesfully'], 201);
     }
@@ -107,7 +104,9 @@ class MultiplayerController extends Controller
 
 
     public function getLobbyDetail($lobby_id){
-        $lobby = MultiplayerSession::where("session_code", "=",  $lobby_id)->first();
+        $lobby = MultiplayerSession::where("session_code", "=",  $lobby_id)
+        ->where("status", "=", "waiting")
+        ->first();
 
         return $lobby
             ? response()->json(['success' => true, 'lobby' => $lobby])
@@ -118,7 +117,6 @@ class MultiplayerController extends Controller
         $lobby = MultiplayerSession::where("session_code", "=",  $lobby_id)->first();
         
         if (!$lobby) {
-            // error redirect ke 404
             return redirect()->route('404');
         }
         
