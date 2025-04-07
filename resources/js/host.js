@@ -7,21 +7,24 @@ document.addEventListener('DOMContentLoaded', async function(){
     const codeDigitContainer = document.getElementById("code-text");
     
     const questions = await getQuestions(category, difficulty, limit);
+    // console.log(questions.data)
 
     const template = await createTemplate(category, difficulty);
     const templateId = template.data.id
 
-    // console.log(questions.data)
-
+    
+    // session nanti ambil dari param
     const session = await createSession(userId, templateId);
     const sessionCode = session.data.session_code;
+    const sessionId = session.data.id;
 
     codeDigitContainer.textContent = `Your room code is: ${sessionCode}`;
-
     
     Echo.private(`multiplayer.${userId}`)
-        .listen('CreateMultiplayerLobby', (event) => {
+        .listen('CreateMultiplayerLobby', async (event) => {
             console.log(event)
+            const players = await getPlayers(sessionId);
+            console.log(players.data);
         })
 });
 
@@ -78,5 +81,15 @@ async function createSession(hostId, templateId){
 
 async function addPlayerToLobby(){
     // add table multiplayer user pas player join
+}
+
+async function getPlayers(sessionId){
+    try{
+        const response = await fetch(`/api/multiplayer/get-players/${sessionId}`);
+        const data = await response.json();
+        return data;
+    } catch(error){
+        console.error("Error: ", error);
+    }
 }
 

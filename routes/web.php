@@ -62,6 +62,8 @@ Route::prefix('api')->group(function(){
     
     Route::post('/multiplayer/add-session-player', [MultiplayerController::class, 'createMultiplayerUser']);
     
+    Route::get('/multiplayer/get-players/{session_id}', [MultiplayerController::class, 'getPlayersBySessionId']);
+    
     Route::get('/multiplayer/get-session-by-code/{session_code}', [MultiplayerController::class, 'getSessionIdBySessionCode']);
     
     Route::post('/quiz/store', [WebQuizController::class, 'storeQuiz']);

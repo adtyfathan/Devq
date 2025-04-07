@@ -95,7 +95,8 @@ class MultiplayerController extends Controller
         return response()->json(['message' => 'Player added succesfully'], 201);
     }
 
-    public function showHostView(Request $request, $category){       
+    public function showHostView(Request $request, $category){   
+        // if(!sessionCode in MultiplayerSession) 
         $difficulty = $request->query('difficulty', 'easy'); 
         $limit = $request->query('limit', 10); 
         
@@ -131,5 +132,17 @@ class MultiplayerController extends Controller
         }
         
         return response()->json(['message' => 'Session found', 'data' => $session], 200);
+    }
+
+    public function getPlayersBySessionId($sessionId){
+        $session = MultiplayerSession::with('users')->find($sessionId);
+        
+        if(!$session){
+            return response()->json(['message' => 'Session not found'], 404);
+        }
+
+        $players = $session->users;
+
+        return response()->json(['message' => 'Players retrieved', 'data' => $players], 200);
     }
 }
