@@ -11,12 +11,16 @@ document.addEventListener('DOMContentLoaded', async function(){
     const sessionId = session.data.id;
 
     codeDigitContainer.textContent = `Your room code is: ${sessionCode}`;
-    
+
+    const playersData = await getPlayers(sessionId);
+    const players = playersData.data;
+
+    players.forEach(player => displayPlayers(player));
+
     Echo.private(`multiplayer.${userId}`)
         .listen('CreateMultiplayerLobby', async (event) => {
-            console.log(event)
-            const players = await getPlayers(sessionId);
-            console.log(players.data);
+            console.log(event.player)
+            addPlayers(event.player)
         })
 });
 
@@ -48,4 +52,20 @@ async function getSessionIdBySessionCode(sessionCode) {
     } catch (error){
         console.error("Error: ", error);
     }
+}
+
+function displayPlayers(player){
+    const playersWrapper = document.getElementById("players-wrapper");
+
+    playersWrapper.innerHTML += `
+        <p>${player.pivot.username }</p>
+    `;
+}
+
+function addPlayers(player){
+    const playersWrapper = document.getElementById("players-wrapper");
+
+    playersWrapper.innerHTML += `
+        <p>${player.username}</p>
+    `;
 }

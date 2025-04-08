@@ -77,7 +77,7 @@ class MultiplayerController extends Controller
         $hostId = $session->host_id;
         $host = User::find($hostId);
 
-        $user = User::findOrFail($validated['player_id']);
+        $user = User::find($validated['player_id']);
 
         $session->users()->attach($user->id, [
             'username' => $validated['username'],
@@ -86,13 +86,15 @@ class MultiplayerController extends Controller
         ]);
 
         // player
-        $player = MultiplayerUser::where('multiplayer_session_id', $session->id)
+        $player = MultiplayerUser::latest('id')
+            ->where('multiplayer_session_id', $session->id)
             ->where('user_id', $user->id)
             ->first();
 
+
         broadcast(new CreateMultiplayerLobby($session, $host, $player));
 
-        return response()->json(['message' => 'Player added succesfully'], 201);
+        return response()->json(['message' => 'Player added succesfully', 'data' => $player], 201);
     }
 
     public function showHostView($sessionCode){   

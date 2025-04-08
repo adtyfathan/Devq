@@ -22,8 +22,9 @@ async function joinLobby(lobbyId) {
             const sessionId = session.data.id;
 
             const sessionPlayer = await insertSessionPlayers(sessionId, userId, username);
+            console.log(sessionPlayer)
 
-            window.location.href = `/multiplayer/player/${lobbyId}`;
+            // window.location.href = `/multiplayer/player/${lobbyId}`;
         }
     } catch (error) {
         console.error("Error:", error);
