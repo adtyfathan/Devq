@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\CreateMultiplayerLobby;
+use App\Events\LeaveMultiplayerLobby;
 use App\Models\MultiplayerSession;
 use App\Models\MultiplayerUser;
 use App\Models\User;
@@ -97,6 +98,27 @@ class MultiplayerController extends Controller
         return response()->json(['message' => 'Player added succesfully', 'data' => $player], 201);
     }
 
+    public function leaveMultiplayerUser(Request $request){
+        $validated = $request->validate([
+            'session_id' => 'required|exists:multiplayer_session,id',
+            'player_id' => 'required|exists:users,id'
+        ]);
+
+        $session = MultiplayerSession::findOrFail($validated['session_id']);
+        $user = User::findOrFail($validated['player_id']);
+        $host = User::findOrFail($session->host_id);
+
+        $session->users()->detach($user->id);
+
+        MultiplayerUser::where('multiplayer_session_id', $session->id)
+            ->where('user_id', $user->id)
+            ->delete();
+
+        broadcast(new LeaveMultiplayerLobby($session, $host, $user));
+
+        return response()->json(['message' => 'Player left the lobby'], 200);
+    }
+
     public function showHostView($sessionCode){   
         $session = MultiplayerSession::where('session_code', '=', $sessionCode)->first();
         
@@ -148,5 +170,9 @@ class MultiplayerController extends Controller
         $players = $session->users;
 
         return response()->json(['message' => 'Players retrieved', 'data' => $players], 200);
+    }
+
+    public function deleteUserSessionByUserId($userId){
+        
     }
 }

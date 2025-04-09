@@ -3,5 +3,7 @@
 
     <h1>Player View</h1>
 
+    <button id="leave-button">Leave lobby</button>
+
     @vite(['resources/js/player.js'])
 </x-layouts.app>

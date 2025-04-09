@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', async function(){
             console.log(event.player)
             addPlayers(event.player)
         })
+        .listen('LeaveMultiplayerLobby', async (event) => {
+            console.log(event.player);
+        });
 });
 
 async function getQuestions(category, difficulty, limit){
