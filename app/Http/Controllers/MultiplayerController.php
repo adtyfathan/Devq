@@ -161,13 +161,11 @@ class MultiplayerController extends Controller
     }
 
     public function getPlayersBySessionId($sessionId){
-        $session = MultiplayerSession::with('users')->find($sessionId);
-        
-        if(!$session){
-            return response()->json(['message' => 'Session not found'], 404);
-        }
+        $players = MultiplayerUser::where('multiplayer_session_id', $sessionId)->get();
 
-        $players = $session->users;
+        if ($players->isEmpty()) {
+            return response()->json(['message' => 'No players found in session'], 404);
+        }
 
         return response()->json(['message' => 'Players retrieved', 'data' => $players], 200);
     }

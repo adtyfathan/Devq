@@ -9,7 +9,7 @@ leaveButton.addEventListener('click', async function(){
 
     console.log(removePlayer)
 
-    // window.location.href = `/`;
+    window.location.href = `/`;
 });
 
 async function deleteUserFromLobby(lobbyId, userId) {

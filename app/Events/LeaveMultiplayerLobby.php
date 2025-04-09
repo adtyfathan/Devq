@@ -40,7 +40,7 @@ class LeaveMultiplayerLobby implements ShouldBroadcast
         return [
             'player' => [
                 'id' => $this->user->id,
-                'username' => $this->user->name // or other identifier
+                'username' => $this->user->name
             ]
         ];
     }

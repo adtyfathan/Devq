@@ -6,6 +6,7 @@
     <h3 id="code-text"></h3>
 
     <div id="players-wrapper">
+        <p id="error-text"></p>
         <h1>Player lists</h1>
     </div>
     

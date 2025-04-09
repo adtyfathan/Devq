@@ -1,29 +1,31 @@
 document.addEventListener('DOMContentLoaded', async function(){
     const sessionCode = window.location.pathname.split("/").pop();
-    
     const userId = window.Laravel.user_id;
-
     const codeDigitContainer = document.getElementById("code-text");
     
     // const questions = await getQuestions(category, difficulty, limit);
 
     const session = await getSessionIdBySessionCode(sessionCode);
     const sessionId = session.data.id;
-
     codeDigitContainer.textContent = `Your room code is: ${sessionCode}`;
 
     const playersData = await getPlayers(sessionId);
-    const players = playersData.data;
 
-    players.forEach(player => displayPlayers(player));
+    if (playersData && Array.isArray(playersData.data)) {
+        playersData.data.forEach(player => displayPlayers(player));
+    } else {
+        document.getElementById("error-text").textContent = "There is no player here...";
+    }
 
     Echo.private(`multiplayer.${userId}`)
         .listen('CreateMultiplayerLobby', async (event) => {
-            console.log(event.player)
-            addPlayers(event.player)
+            if (event.player){
+                document.getElementById("error-text").textContent = "";
+            } 
+            addPlayers(event.player);
         })
         .listen('LeaveMultiplayerLobby', async (event) => {
-            console.log(event.player);
+            removePlayer(event.player.id);
         });
 });
 
@@ -40,6 +42,15 @@ async function getQuestions(category, difficulty, limit){
 async function getPlayers(sessionId){
     try{
         const response = await fetch(`/api/multiplayer/get-players/${sessionId}`);
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                document.getElementById("error-text").textContent = "There is no player here..."
+                return;
+            }
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const data = await response.json();
         return data;
     } catch(error){
@@ -49,7 +60,7 @@ async function getPlayers(sessionId){
 
 async function getSessionIdBySessionCode(sessionCode) {
     try {
-        const response = await fetch(`/api/multiplayer/get-session-by-code/${sessionCode}`);
+        const response = await fetch(`/api/multiplayer/get-session-by-code/${sessionCode}`);        
         const data = await response.json();
         return data;
     } catch (error){
@@ -61,7 +72,9 @@ function displayPlayers(player){
     const playersWrapper = document.getElementById("players-wrapper");
 
     playersWrapper.innerHTML += `
-        <p>${player.pivot.username }</p>
+        <div class="player-container" data-id=${player.user_id}>
+            <p>${player.username}</p>
+        </div>
     `;
 }
 
@@ -69,6 +82,15 @@ function addPlayers(player){
     const playersWrapper = document.getElementById("players-wrapper");
 
     playersWrapper.innerHTML += `
-        <p>${player.username}</p>
+        <div class="player-container" data-id=${player.user_id}>
+            <p>${player.username}</p>
+        </div>
     `;
+}
+
+function removePlayer(playerId) {
+    const playerElement = document.querySelector(`.player-container[data-id="${playerId}"]`);
+    if (playerElement) {
+        playerElement.remove();
+    }
 }
