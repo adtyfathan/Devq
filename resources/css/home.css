@@ -18,6 +18,11 @@
     width: 200px;
 }
 
+.ongoing-container {
+    border: 1px solid black;
+    display: none;
+}
+
 #error-message {
     color: red;
     display: none;

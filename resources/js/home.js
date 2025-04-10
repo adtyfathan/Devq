@@ -1,30 +1,61 @@
-const multiplayerForm = document.getElementById("multiplayer-form");
+document.addEventListener('DOMContentLoaded', async () => {
+    const userId = window.Laravel.user_id;
 
+    const ongoingData = await getOngoingQuizById(userId);
+    if (!ongoingData.success) return;
+
+    displayOngoingQuiz(ongoingData);
+});
+
+const multiplayerForm = document.getElementById("multiplayer-form");
 multiplayerForm.addEventListener("submit", event => {
     event.preventDefault();
+
     const lobbyId = document.getElementById("lobby-input").value;
-    
     joinLobby(lobbyId);
 })
 
+function displayOngoingQuiz(data) {
+    const container = document.getElementById("ongoing-container");
+    const content = document.getElementById("ongoing-content");
+
+    const { multiplayer_session, username } = data;
+    const { quiz_template, session_code } = multiplayer_session;
+
+    const title = `${quiz_template.difficulty} ${quiz_template.category} quiz`;
+    const url = `/multiplayer/player/${session_code}`;
+
+    container.style.display = "block";
+    content.innerHTML = `
+        <h3>${title}</h3>
+        <p>${username}</p>
+        <a href="${url}">Join</a>
+    `;
+}
+
 async function joinLobby(lobbyId) {
     try {
-        let response = await fetch(`/api/multiplayer/lobby/${lobbyId}`);
-        let data = await response.json();
+        const response = await fetch(`/api/multiplayer/lobby/${lobbyId}`);
+        const data = await response.json();
 
         if (!data.success) {
-            showErrorMessage(data.message);
-        } else {
-            const userId = window.Laravel.user_id;
-            const username = document.getElementById("lobby-username").value;
+            return showErrorMessage(data.message);
+        } 
 
-            const session = await getSessionId(lobbyId);
-            const sessionId = session.data.id;
+        const userId = window.Laravel.user_id;
+        const username = document.getElementById("lobby-username").value;
 
-            const sessionPlayer = await insertSessionPlayers(sessionId, userId, username);
+        const session = await getSessionId(lobbyId);
+        const sessionId = session.data.id;
 
-            window.location.href = `/multiplayer/player/${lobbyId}`;
+        const sessionPlayer = await insertSessionPlayers(sessionId, userId, username);
+
+        if (!sessionPlayer.success) {
+            return showErrorMessage(sessionPlayer.message || "Failed to join the session.");
         }
+
+        window.location.href = `/multiplayer/player/${lobbyId}`;
+        
     } catch (error) {
         console.error("Error:", error);
     }
@@ -59,9 +90,39 @@ async function insertSessionPlayers(sessionId, playerId, username){
                 username: username
             })
         });
+
         const data = await response.json();
-        return data;
+
+        return {
+            success: response.ok,
+            ...data
+        };
     } catch(error){
         console.error("Error: ", error);
+
+        return {
+            success: false,
+            message: "Failed to join the session due to a network error."
+        };
+    }
+}
+
+async function getOngoingQuizById(playerId){
+    try {
+        const response = await fetch(`/api/multiplayer/get-player-session/${playerId}`);
+        
+        const data = await response.json();
+
+        return {
+            success: response.ok,
+            ...data.data
+        };
+    } catch(error){
+        console.error("Error: ", error);
+
+        return {
+            success: false,
+            message: "Failed to join the session due to a network error."
+        };
     }
 }

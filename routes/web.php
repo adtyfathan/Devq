@@ -61,7 +61,8 @@ Route::prefix('api')->group(function(){
     // 
     Route::get('/multiplayer/lobby/{lobby_id}', [MultiplayerController::class, 'getLobbyDetail']);
     
-    Route::post('/multiplayer/add-session-player', [MultiplayerController::class, 'createMultiplayerUser']);
+    Route::post('/multiplayer/add-session-player', [MultiplayerController::class, 'createMultiplayerUser'])->middleware('canJoin');
+    Route::get('/multiplayer/get-player-session/{player_id}', [MultiplayerController::class, 'getQuizSessionByPlayerId']);
     Route::delete('/multiplayer/remove-session-player', [MultiplayerController::class, 'leaveMultiplayerUser']);
     
     Route::get('/multiplayer/get-players/{session_id}', [MultiplayerController::class, 'getPlayersBySessionId']);

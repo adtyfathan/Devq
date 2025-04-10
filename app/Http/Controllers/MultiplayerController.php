@@ -119,6 +119,23 @@ class MultiplayerController extends Controller
         return response()->json(['message' => 'Player left the lobby'], 200);
     }
 
+    public function getQuizSessionByPlayerId($playerId){
+        $player = MultiplayerUser::with(['multiplayerSession.quizTemplate'])
+            ->where('user_id', $playerId)
+            ->where('completed_at', null)
+            ->latest('joined_at')
+            ->first();
+        
+        if (!$player) {
+            return response()->json(['message' => 'No ongoing quiz found'], 404);
+        }
+
+        return response()->json([
+            'message' => 'Quiz session retrieved',
+            'data' => $player
+        ], 200);
+    }
+
     public function showHostView($sessionCode){   
         $session = MultiplayerSession::where('session_code', '=', $sessionCode)->first();
         

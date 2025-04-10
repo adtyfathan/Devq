@@ -24,7 +24,7 @@ class MultiplayerSession extends Model
 
     public function quizTemplate()
     {
-        return $this->belongsTo(MultiplayerSession::class, 'quiz_id');
+        return $this->belongsTo(QuizTemplate::class, 'quiz_id');
     }
 
     public function users()

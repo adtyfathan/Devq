@@ -3,16 +3,26 @@
         @vite(['resources/css/home.css'])
         <h1>DevQ</h1>
 
-        <form id="multiplayer-form">
-            <p id="error-message"></p>
-            
-            {{-- max 6 digit --}}
-            <label for="username">Username</label>
-            <input type="text" name="username" id="lobby-username" />
-            <label for="quiz-id">Lobby Id</label>
-            <input type="number" name="quiz-id" id="lobby-input" />
-            <input type="submit" value="Join" />
-        </form>
+        <div>
+            <div id="ongoing-container" class="ongoing-container">
+                <h1>Ongoing Quiz</h1>
+                <div id="ongoing-content">
+
+                </div>
+            </div>
+
+            <div>
+                <form id="multiplayer-form">
+                    <p id="error-message"></p>
+                    {{-- max 6 digit --}}
+                    <label for="username">Username</label>
+                    <input type="text" name="username" id="lobby-username" />
+                    <label for="quiz-id">Lobby Id</label>
+                    <input type="number" name="quiz-id" id="lobby-input" />
+                    <input type="submit" value="Join" />
+                </form>
+            </div>
+        </div>
 
         <a href="{{ route('quiz.create') }}">create quiz</a>
 
