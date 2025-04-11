@@ -75,33 +75,52 @@ class QuizController extends Controller
         }
     }
 
-    public function getQuizById($id){
+    public function getQuizById($id)
+    {
         try {
-            $quiz = Quiz::find($id);
+            $quiz = DB::table('quizzes')->where('id', $id)->first();
 
             if (!$quiz) {
                 return response()->json(['error' => 'No Quiz found'], 404);
             }
 
             return response()->json($quiz, 200);
-        } catch(Exception $e){
-            Log::error('Error in getQuizById method', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
+        } catch (Exception $e) {
+            Log::error('Error in getQuizById method', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Something went wrong',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 
-    public function getQuizByUserId($user_id){
+    public function getQuizByUserId($user_id)
+    {
         try {
-            $quiz = Quiz::where('user_id', $user_id)->get();
-            
-            if ($quiz->isEmpty()) {
+            $quizzes = DB::table('quizzes')
+                ->where('user_id', $user_id)
+                ->orderByDesc('completed_at')
+                ->get();
+
+            if ($quizzes->isEmpty()) {
                 return response()->json(['error' => 'No quizzes found'], 404);
             }
 
-            return response()->json($quiz, 200);
-        } catch (Exception $e){
-            Log::error('Error in getQuizByUserId method', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
+            return response()->json($quizzes, 200);
+        } catch (Exception $e) {
+            Log::error('Error in getQuizByUserId method', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Something went wrong',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }

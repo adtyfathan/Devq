@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class MultiplayerController extends Controller
 {
@@ -41,18 +42,17 @@ class MultiplayerController extends Controller
 
             do {
                 $sessionCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-            } while (MultiplayerSession::where('session_code', $sessionCode)->exists());
-
-            $sessionCodeStr = (string)$sessionCode;
+            } while (DB::table('multiplayer_session')->where('session_code', $sessionCode)->exists());
             
             $session = MultiplayerSession::create([
                 'host_id' => $validated['host_id'],
                 'quiz_id' => $validated['quiz_id'],
-                'session_code' => $sessionCodeStr,
+                'session_code' => $sessionCode,
                 'status' => $validated['status']
             ]);
 
             return response()->json(['message' => 'Session created', 'data' => $session], 201);
+            
         } catch (Exception $e){
             Log::error('Error in store method', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
@@ -60,8 +60,7 @@ class MultiplayerController extends Controller
     }
 
     public function updateSessionState(){
-        // start_at quiz pas quiz mulai by host
-        // ended_at quiz pas session code quiz berakhir
+        
     }
 
     public function createMultiplayerUser(Request $request){
@@ -70,31 +69,37 @@ class MultiplayerController extends Controller
             'player_id' => 'required|exists:users,id',
             'username' => 'required'
         ]);
+        
+        try {
+            // session
+            $session = MultiplayerSession::with('host')->findOrFail($validated['session_id']);
+            $user = User::findOrFail($validated['player_id']);
 
-        // session
-        $session = MultiplayerSession::findOrFail($validated['session_id']);
+            $session->users()->attach($user->id, [
+                'username' => $validated['username'],
+                'point' => 0,
+                'joined_at' => now()
+            ]);
 
-        // host
-        $hostId = $session->host_id;
-        $host = User::find($hostId);
+            // host
+            $host = $session->host;
 
-        $user = User::find($validated['player_id']);
+            // player
+            $player = MultiplayerUser::where([
+                ['multiplayer_session_id', '=', $session->id],
+                ['user_id', '=', $user->id],
+            ])->latest('id')->first();
 
-        $session->users()->attach($user->id, [
-            'username' => $validated['username'],
-            'point' => 0,
-            'joined_at' => Carbon::now()
-        ]);
-
-        // player
-        $player = MultiplayerUser::latest('id')
-            ->where('multiplayer_session_id', $session->id)
-            ->where('user_id', $user->id)
-            ->first();
-
-        broadcast(new CreateMultiplayerLobby($session, $host, $player));
-
-        return response()->json(['message' => 'Player added succesfully', 'data' => $player], 201);
+            broadcast(new CreateMultiplayerLobby($session, $host, $player));
+            
+            return response()->json(['message' => 'Player added successfully', 'data' => $player], 201);
+        } catch (Exception $e) {
+            Log::error('Error in createMultiplayerUser method', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function leaveMultiplayerUser(Request $request){
@@ -103,36 +108,61 @@ class MultiplayerController extends Controller
             'player_id' => 'required|exists:users,id'
         ]);
 
-        $session = MultiplayerSession::findOrFail($validated['session_id']);
-        $user = User::findOrFail($validated['player_id']);
-        $host = User::findOrFail($session->host_id);
+        try {
+            $session = MultiplayerSession::with('host')->findOrFail($validated['session_id']);
+            $user = User::findOrFail($validated['player_id']);
+            $host = $session->host;
 
-        $session->users()->detach($user->id);
+            if ($session->users()->where('user_id', $user->id)->exists()) {
+                $session->users()->detach($user->id);
+            }
 
-        MultiplayerUser::where('multiplayer_session_id', $session->id)
-            ->where('user_id', $user->id)
-            ->delete();
+            MultiplayerUser::where([
+                ['multiplayer_session_id', '=', $session->id],
+                ['user_id', '=', $user->id],
+            ])->delete();
 
-        broadcast(new LeaveMultiplayerLobby($session, $host, $user));
+            broadcast(new LeaveMultiplayerLobby($session, $host, $user));
 
-        return response()->json(['message' => 'Player left the lobby'], 200);
+            return response()->json(['message' => 'Player left the lobby'], 200);
+        } catch (Exception $e) {
+            Log::error('Error in leaveMultiplayerUser method', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
+        }
     }
 
-    public function getQuizSessionByPlayerId($playerId){
-        $player = MultiplayerUser::with(['multiplayerSession.quizTemplate'])
-            ->where('user_id', $playerId)
-            ->where('completed_at', null)
-            ->latest('joined_at')
-            ->first();
-        
-        if (!$player) {
-            return response()->json(['message' => 'No ongoing quiz found'], 404);
-        }
+    
+    public function getQuizSessionByPlayerId($playerId)
+    {
+        try {
+            $player = MultiplayerUser::with([
+                    'multiplayerSession:id,quiz_id,status,host_id,session_code', 
+                    'multiplayerSession.quizTemplate:id,category,difficulty'
+                ])
+                ->where('user_id', $playerId)
+                ->whereNull('completed_at')
+                ->latest('joined_at')
+                ->first();
 
-        return response()->json([
-            'message' => 'Quiz session retrieved',
-            'data' => $player
-        ], 200);
+            if (!$player) {
+                return response()->json(['message' => 'No ongoing quiz found'], 404);
+            }
+
+            return response()->json([
+                'message' => 'Quiz session retrieved',
+                'data' => $player
+            ], 200);
+        } catch (Exception $e) {
+            Log::error('Error in getQuizSessionByPlayerId method', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function showHostView($sessionCode){   
@@ -148,8 +178,8 @@ class MultiplayerController extends Controller
 
     public function getLobbyDetail($lobby_id){
         $lobby = MultiplayerSession::where("session_code", "=",  $lobby_id)
-        ->where("status", "=", "waiting")
-        ->first();
+            ->where("status", "=", "waiting")
+            ->first();
 
         return $lobby
             ? response()->json(['success' => true, 'lobby' => $lobby])
@@ -177,7 +207,7 @@ class MultiplayerController extends Controller
     }
 
     public function getPlayersBySessionId($sessionId){
-        $players = MultiplayerUser::where('multiplayer_session_id', $sessionId)->get();
+        $players = DB::table('multiplayer_user')->where('multiplayer_session_id', $sessionId)->get();
 
         if ($players->isEmpty()) {
             return response()->json(['message' => 'No players found in session'], 404);

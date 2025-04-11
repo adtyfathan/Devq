@@ -17,33 +17,45 @@ class ReviewController extends Controller
         return view('quiz.review');
     }
 
-    public function getQuizReview($id){
-        $quiz = Quiz::with(['questions' => function ($query) {
-            $query->select('questions.id', 'questions.question', 'questions.description', 'questions.answers', 'questions.correct_answers', 'questions.explanation')
-                ->withPivot('user_answer');
-        }])->find($id);
+    public function getQuizReview($id)
+    {
+        $quiz = Quiz::select('id', 'score', 'category', 'difficulty', 'completed_at')
+            ->with([
+                'questions' => function ($query) {
+                    $query->select(
+                            'questions.id',
+                            'questions.question',
+                            'questions.description',
+                            'questions.answers',
+                            'questions.correct_answers',
+                            'questions.explanation'
+                        )
+                        ->withPivot('user_answer');
+                }
+            ])
+            ->find($id);
 
         if (!$quiz) {
             return response()->json(['message' => 'Quiz not found'], 404);
         }
 
-        return response()->json([
+        $reviewData = [
             'quiz_id' => $quiz->id,
             'score' => $quiz->score,
             'category' => $quiz->category,
             'difficulty' => $quiz->difficulty,
             'completed_at' => $quiz->completed_at,
-            'questions' => $quiz->questions->map(function ($question) {
-                return [
-                    'question_id' => $question->id,
-                    'question' => $question->question,
-                    'description' => $question->description,
-                    'answers' => $question->answers,
-                    'correct_answers' => $question->correct_answers,
-                    'explanation' => $question->explanation,
-                    'user_answer' => $question->pivot->user_answer,
-                ];
-            }),
-        ], 200);
-    }
+            'questions' => $quiz->questions->map(fn($q) => [
+                'question_id' => $q->id,
+                'question' => $q->question,
+                'description' => $q->description,
+                'answers' => $q->answers,
+                'correct_answers' => $q->correct_answers,
+                'explanation' => $q->explanation,
+                'user_answer' => $q->pivot->user_answer,
+            ]),
+        ];
+
+        return response()->json($reviewData, 200);
+}
 }

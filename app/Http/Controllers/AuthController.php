@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -17,25 +18,30 @@ class AuthController extends Controller
         return view("auth.register");
     }
     
-    public function login(Request $request){
-        $request->validate([
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = DB::table('users')
+            ->select('id', 'email', 'password')
+            ->where('email', $credentials['email'])
+            ->first();
 
         if (!$user) {
             return back()->withErrors(['email' => 'Akun tidak ditemukan'])->onlyInput('email');
         }
 
-        if (!Auth::attempt(['email' => $request->email, 'password' => $request->password], $request->filled('remember'))) {
+        if (!Hash::check($credentials['password'], $user->password)) {
             return back()->withErrors(['password' => 'Password salah'])->onlyInput('email');
         }
 
-        $request->session()->regenerate();
+        Auth::loginUsingId($user->id, $request->filled('remember'));
 
-        $request->session()->put('user_id', Auth::id());
+        $request->session()->regenerate();
+        $request->session()->put('user_id', $user->id);
 
         return redirect()->intended('/');
     }
@@ -57,14 +63,18 @@ class AuthController extends Controller
             'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, and one number.'
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
+        $userId = DB::table('users')->insertGetId([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
 
-        $user = User::create($validated);
-        Auth::login($user);
+        Auth::loginUsingId($userId);
 
         $request->session()->regenerate();
-
-        $request->session()->put('user_id', $user->id);
+        $request->session()->put('user_id', $userId);
 
         return redirect()->intended('/');
     }

@@ -1,26 +1,28 @@
-document.addEventListener("DOMContentLoaded", function(){
-    const userId = window.Laravel.user_id;
+document.addEventListener("DOMContentLoaded", () => {
+    const userId = window.Laravel?.user_id;
+    if (!userId) return console.error("User ID not found.");
 
     const titleText = document.getElementById("title");
     const nameInput = document.getElementById("name");
     const emailInput = document.getElementById("email");
     const pointInput = document.getElementById("point");
 
-    function fetchUser(){
-        fetch(`user/${userId}`)
-            .then(response => response.json())
-            .then(data => {
-                displayUser(data);
-            })
-            .catch(error => console.error("Fetch error:", error));
-    }
+    const fetchUser = async () => {
+        try {
+            const response = await fetch(`/user/${userId}`);
+            const user = await response.json();
+            renderUser(user);
+        } catch (error) {
+            console.error("Error fetching user:", error);
+        }
+    };
 
-    function displayUser(user){
-        titleText.innerHTML = `Halo ${user.name}!`;
-        nameInput.value = user.name;
-        emailInput.value = user.email;
-        pointInput.value = user.point;
-    }
+    const renderUser = ({ name, email, point }) => {
+        titleText.textContent = `Halo ${name}!`;
+        nameInput.value = name;
+        emailInput.value = email;
+        pointInput.value = point;
+    };
 
     fetchUser();
-})
+});

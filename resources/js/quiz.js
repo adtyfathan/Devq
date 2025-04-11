@@ -1,8 +1,11 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const urlParams = new URLSearchParams(window.location.search);
+document.addEventListener("DOMContentLoaded", () => {
     const category = window.location.pathname.split("/").pop();
+    const urlParams = new URLSearchParams(window.location.search);
     const difficulty = urlParams.get("difficulty") || "easy";
     const limit = urlParams.get("limit") || 10;
+
+    const quizContainer = document.getElementById("quiz-container");
+    const timerText = document.getElementById("timer");
 
     let questions = [];
     let currentQuestionIndex = 0;
@@ -11,111 +14,108 @@ document.addEventListener("DOMContentLoaded", function () {
     let userAnswers = [];
     let falseAnswerCount = 0;
 
-    const quizContainer = document.getElementById("quiz-container");
-    const timerText = document.getElementById("timer");
+    const getCorrectAnswer = (correctAnswers) =>
+        Object.entries(correctAnswers)
+            .find(([_, value]) => value === "true")?.[0]
+            .replace("_correct", "");
 
-    function getCorrectAnswers(correctAnswers){
-        return Object.entries(correctAnswers)
-            .filter(([key, value]) => value === "true") 
-            .map(([key]) => key.replace("_correct", "")) 
-            .shift();
-    }
+    const fetchQuestions = async () => {
+        try {
+            const res = await fetch(`/api/questions?category=${category}&difficulty=${difficulty}&limit=${limit}`);
+            const data = await res.json();
+            questions = data.questions;
 
-    function fetchQuestions() { // aman
-        fetch(`/api/questions?category=${category}&difficulty=${difficulty}&limit=${limit}`)
-            .then(response => response.json())
-            .then(data => {
-                questions = data.questions;
-                if (questions.length > 0) {
-                    displayQuestion(questions[currentQuestionIndex]);
-                } else {
-                    quizContainer.innerHTML = "<p>No questions found.</p>";
-                }
-            })
-            .catch(error => console.error("Fetch error:", error));
-    }
+            if (questions.length) {
+                displayQuestion(questions[currentQuestionIndex]);
+            } else {
+                quizContainer.innerHTML = "<p>No questions found.</p>";
+            }
+        } catch (err) {
+            console.error("Fetch error:", err);
+        }
+    };
 
-    function startTimer() {
-        clearInterval(countdown); 
-        timeLeft = 10; 
-        timerText.innerHTML = `Timer: ${timeLeft}`;
+    const startTimer = () => {
+        clearInterval(countdown);
+        timeLeft = 10;
+        updateTimerText();
 
         countdown = setInterval(() => {
             timeLeft--;
-            timerText.innerHTML = `Timer: ${timeLeft}`;
+            updateTimerText();
 
             if (timeLeft <= 0) {
                 clearInterval(countdown);
-
-                const correctAnswer = getCorrectAnswers(questions[currentQuestionIndex].correct_answers);
-
+                const correctAnswer = getCorrectAnswer(questions[currentQuestionIndex].correct_answers);
                 checkAnswer(correctAnswer, null);
-
-                // nextQuestion()
-
-                // jeda buat animasi benar/salah pas waktu 10 detik abis
-                // setTimeout(nextQuestion, 3000);
+                nextQuestion(); // Optionally wrap with setTimeout for feedback animation
             }
         }, 1000);
-    }
+    };
 
-    function displayQuestion(question) {
+    const updateTimerText = () => {
+        timerText.textContent = `Timer: ${timeLeft}`;
+    };
+
+    const displayQuestion = (question) => {
+        const answersHTML = Object.entries(question.answers)
+            .map(([key, text]) => text ? `
+                <li>
+                    <input type="radio" name="question" value="${key}" class="answer-option">
+                    ${text}
+                </li>` : ''
+            ).join('');
+
         quizContainer.innerHTML = `
             <h3>${currentQuestionIndex + 1}. ${question.question}</h3>
-            <ul id="answers">
-                ${Object.entries(question.answers)
-                .map(([key, answer]) => answer ? `
-                        <li>
-                            <input type="radio" name="question" value="${key}" class="answer-option">
-                            ${answer}
-                        </li>` : '')
-                .join('')}
-            </ul>
+            <ul id="answers">${answersHTML}</ul>
         `;
 
         startTimer();
 
         document.querySelectorAll(".answer-option").forEach(option => {
-            option.addEventListener("change", function () { // aman
-                const correctAnswer = getCorrectAnswers(questions[currentQuestionIndex].correct_answers);
-                const userAnswer = this.value;
+            option.addEventListener("change", () => {
+                const userAnswer = option.value;
+                const correctAnswer = getCorrectAnswer(questions[currentQuestionIndex].correct_answers);
 
-                document.querySelectorAll(".answer-option").forEach(input => {
-                    input.disabled = true;
-                });
+                document.querySelectorAll(".answer-option").forEach(input => input.disabled = true);
 
                 checkAnswer(correctAnswer, userAnswer);
-
                 userAnswers.push(userAnswer);
 
-                clearInterval(countdown); 
-                
-                // jeda buat animasi benar/salah pas jawab
-                // setTimeout(nextQuestion, 3000);
-                nextQuestion();
+                clearInterval(countdown);
+                nextQuestion(); // Optionally wrap with setTimeout for feedback animation
             });
         });
-    }
+    };
 
-    function checkAnswer(correctAnswer, userAnswer){
-        if (correctAnswer === userAnswer) {
+    const checkAnswer = (correct, selected) => {
+        if (correct === selected) {
             alert("Benar");
         } else {
             falseAnswerCount++;
-            alert(`Salah, jawaban benar ${correctAnswer}`);
+            alert(`Salah, jawaban benar ${correct}`);
         }
-    }
+    };
 
-    function nextQuestion() {
-        clearInterval(countdown); 
+    const nextQuestion = () => {
+        clearInterval(countdown);
         if (currentQuestionIndex < questions.length - 1) {
             currentQuestionIndex++;
             displayQuestion(questions[currentQuestionIndex]);
         } else {
-            const userId = window.Laravel.user_id;
-            const score = ((questions.length - falseAnswerCount) / questions.length) * 100;
-            quizContainer.innerHTML = `<p>Quiz Completed! Score :</p> ${score}`;
-            fetch('/api/quiz/store', {
+            completeQuiz();
+        }
+    };
+
+    const completeQuiz = async () => {
+        const userId = window.Laravel.user_id;
+        const score = ((questions.length - falseAnswerCount) / questions.length) * 100;
+
+        quizContainer.innerHTML = `<p>Quiz Completed! Score : ${score}</p>`;
+
+        try {
+            const res = await fetch('/api/quiz/store', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -123,26 +123,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 body: JSON.stringify({
                     user_id: userId,
-                    score: score,
-                    category: category,
-                    difficulty: difficulty,
+                    score,
+                    category,
+                    difficulty,
                     user_answer: userAnswers,
-                    questions: questions
+                    questions
                 })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.id) {
-                        setTimeout(() => {
-                            window.location.href = `/summary?id=${data.id}`;
-                        }, 5000);
-                    } else {
-                        console.error("Quiz ID not returned:", data);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+            });
+
+            const data = await res.json();
+
+            if (data.id) {
+                setTimeout(() => window.location.href = `/summary?id=${data.id}`, 5000);
+            } else {
+                console.error("Quiz ID not returned:", data);
+            }
+        } catch (err) {
+            console.error("Error:", err);
         }
-    }
+    };
 
     fetchQuestions();
 });

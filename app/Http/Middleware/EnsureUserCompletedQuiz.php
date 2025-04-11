@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class EnsureUserCompletedQuiz
 {
@@ -18,12 +19,17 @@ class EnsureUserCompletedQuiz
     public function handle(Request $request, Closure $next)
     {
         $summaryId = $request->input('id');
-        $user = Auth::user();
+        $userId = Auth::id();
 
-        $quiz = Quiz::find($summaryId);
+        $quizExists = DB::table('quizzes')
+            ->where('id', $summaryId)
+            ->where('user_id', $userId)
+            ->exists();
         
-        if(!$quiz || $quiz->user_id !== $user->id){
-            return response()->json(['message' => 'Unauthorized. You are not completed this quiz.'], 403);
+        if (!$quizExists) {
+            return response()->json([
+                'message' => 'Unauthorized. You have not completed this quiz.'
+            ], 403);
         }
         
         return $next($request);

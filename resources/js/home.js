@@ -29,6 +29,7 @@ function displayOngoingQuiz(data) {
     content.innerHTML = `
         <h3>${title}</h3>
         <p>${username}</p>
+        <p>Session code: ${session_code}</p>
         <a href="${url}">Join</a>
     `;
 }

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Models\MultiplayerSession;
+use Illuminate\Support\Facades\DB;
 
 class UserIsHost
 {
@@ -18,12 +19,17 @@ class UserIsHost
     public function handle(Request $request, Closure $next)
     {
         $sessionCode = $request->route('session_code');
-        $user = Auth::user();
+        $userId = Auth::id();
 
-        $session = MultiplayerSession::where('session_code', $sessionCode)->first();
+        $isHost = DB::table('multiplayer_session')
+            ->where('session_code', $sessionCode)
+            ->where('host_id', $userId)
+            ->exists();
 
-        if (!$session || $session->host_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized. You are not the host of this session.'], 403);
+        if (!$isHost) {
+            return response()->json([
+                'message' => 'Unauthorized. You are not the host of this session.'
+            ], 403);
         }
 
         return $next($request);

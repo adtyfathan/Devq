@@ -9,23 +9,30 @@ use Illuminate\Http\Request;
 
 class TemplateController extends Controller
 {
-    public function storeTemplate(Request $request){
+    public function storeTemplate(Request $request)
+    {
         try {
             $validated = $request->validate([
-                'category' => 'required|string',
-                'difficulty' => 'required|string'
+                'category' => 'required|string|max:255',
+                'difficulty' => 'required|string|max:255',
             ]);
 
-            $template = QuizTemplate::create([
-                'category' => $validated['category'],
-                'difficulty' => $validated['difficulty']
-            ]);
+            $template = QuizTemplate::create($validated);
 
-            return response()->json(["message" => "Quiz template successfully created", "data" => $template], 201);
-            
-        }  catch (Exception $e) {
-            Log::error('Error in store method', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
+            return response()->json([
+                "message" => "Quiz template successfully created",
+                "data" => $template
+            ], 201);
+
+        } catch (Exception $e) {
+            Log::error('Error in storeTemplate method', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'error' => 'Something went wrong',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }

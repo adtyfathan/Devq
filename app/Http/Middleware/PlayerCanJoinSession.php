@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use App\Models\MultiplayerUser;
+use Illuminate\Support\Facades\DB;
 
 class PlayerCanJoinSession
 {
@@ -19,7 +20,8 @@ class PlayerCanJoinSession
         $userId = $request->input('player_id');
         $sessionId = $request->input('session_id');
         
-        $alreadyJoined = MultiplayerUser::where('user_id', $userId)
+        $alreadyJoined = DB::table('multiplayer_user')
+            ->where('user_id', $userId)
             ->where('multiplayer_session_id', $sessionId)
             ->exists();
 
@@ -29,7 +31,8 @@ class PlayerCanJoinSession
             ], 403);
         }
 
-        $inOtherSession = MultiplayerUser::where('user_id', $userId)
+        $inOtherSession = DB::table('multiplayer_user')
+            ->where('user_id', $userId)
             ->whereNull('completed_at')
             ->where('multiplayer_session_id', '!=', $sessionId)
             ->exists();

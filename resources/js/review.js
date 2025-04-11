@@ -1,92 +1,52 @@
-document.addEventListener("DOMContentLoaded", function(){
-    const urlParams = new URLSearchParams(window.location.search);
-    const quizId = urlParams.get("id");
+document.addEventListener("DOMContentLoaded", () => {
+    const quizId = new URLSearchParams(window.location.search).get("id");
     const reviewWrapper = document.getElementById("review-wrapper");
 
-    if (!quizId) {
-        console.error("No quiz ID provided.");
-        return;
-    }
+    if (!quizId) return console.error("No quiz ID provided.");
 
-    function fetchReview(){
-        fetch(`/api/review/${quizId}`)
-            .then(response => response.json())
-            .then(review => {
-                const questions = review.questions
+    const fetchReview = async () => {
+        try {
+            const response = await fetch(`/api/review/${quizId}`);
+            const { questions } = await response.json();
 
-                questions.forEach(question => {
-                    displayQuestion(question, question.user_answer)
-                });
-            })
-            .catch(error => console.error("Error fetching quiz:", error));
-    }
+            questions.forEach(({ question, answers, correct_answers, user_answer }) => {
+                renderQuestion(question, JSON.parse(answers), user_answer, getCorrectAnswer(correct_answers));
+            });
+        } catch (error) {
+            console.error("Error fetching quiz:", error);
+        }
+    };
 
-    function getCorrectAnswers(correctAnswers) {
-        const parsedAnswer = JSON.parse(correctAnswers)
+    const getCorrectAnswer = (correctAnswers) => {
+        const parsed = JSON.parse(correctAnswers);
+        return Object.entries(parsed)
+            .find(([_, value]) => value === "true")?.[0]
+            .replace("_correct", "");
+    };
 
-        return Object.entries(parsedAnswer)
-            .filter(([key, value]) => value === "true")
-            .map(([key]) => key.replace("_correct", ""))
-            .shift();
-    }
+    const renderQuestion = (text, options, userAnswer, correctAnswer) => {
+        const isCorrect = userAnswer === correctAnswer;
 
-    function displayQuestion(question, userAnswer) {
-        const options = question.answers;
+        const optionsHTML = Object.entries(options).map(([key, label]) => {
+            if (!label) return '';
+            const className = isCorrect
+                ? (key === correctAnswer ? "correct-answer" : "")
+                : key === correctAnswer
+                    ? "correct-answer"
+                    : key === userAnswer
+                        ? "user-answer"
+                        : "";
 
-        // string
-        const correct_answer= getCorrectAnswers(question.correct_answers)
-    
-        const parsedOption = JSON.parse(options);
-
-        const questionState = checkAnswer(userAnswer, correct_answer);
+            return `<li class="${className}">${label}</li>`;
+        }).join('');
 
         reviewWrapper.innerHTML += `
-            <div class="question-container ${questionState === true ? "correct-container" : "wrong-container"}">
-                <h3>${question.question}</h3>
-                <ul id="answers">
-                    ${Object.entries(parsedOption)
-
-                    // ANSWER CLASSIFICATION
-                    // if (questionState === true) {
-                    //     if (key === correct_answer) {
-                    //         'correct-answer'
-                    //     }
-                    // } else {
-                    //     if (key === correct_answer) {
-                    //         'correct-answer'
-                    //     } else if (key === userAnswer) {
-                    //         'user-answer'
-                    //     } else {
-                    //         ''
-                    //     }
-                    // }
-
-                    .map(([key, option]) => option ? `
-                            <li class="${
-                                    questionState
-                                        ? (key === correct_answer ? 'correct-answer' : '')
-                                        : (key === correct_answer 
-                                            ? 'correct-answer' 
-                                            : key === userAnswer
-                                                ? 'user-answer'
-                                                : ''
-                                            )
-                                    }">
-                                ${option}
-                            </li>` : null)
-                    .join('')}
-                </ul>
+            <div class="question-container ${isCorrect ? "correct-container" : "wrong-container"}">
+                <h3>${text}</h3>
+                <ul id="answers">${optionsHTML}</ul>
             </div>
         `;
-    }
-
-    function checkAnswer(userAnswer, correctAnswer){
-        if (userAnswer === correctAnswer){
-            return true;
-        } else {
-            return false;
-        }
-    }
+    };
 
     fetchReview();
 });
