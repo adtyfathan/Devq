@@ -33,7 +33,7 @@ class CreateMultiplayerLobby implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel("multiplayer.{$this->host->id}")
+            new PrivateChannel("multiplayer.{$this->session->id}")
         ];
     }
 }

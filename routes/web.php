@@ -29,19 +29,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/{id}', [UserController::class, 'getUserById'])->name('user.show');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     
-    Route::get('/summary', [SummaryController::class, 'index'])->name("summary.show");
+    Route::get('/summary', [SummaryController::class, 'index'])->name("summary.show")->middleware('ensureCompletedQuiz');
     
     Route::get('/create/quiz', [WebQuizController::class, 'createQuizView'])->name('quiz.create');
 
     Route::get('/quiz/{category}', [QuizController::class, 'showQuiz'])->name('quiz.show');
     
-    
-    Route::get('/multiplayer/host/{session_code}', [MultiplayerController::class, 'showHostView'])->name('quiz.host');
+    Route::get('/multiplayer/host/{session_code}', [MultiplayerController::class, 'showHostView'])->name('quiz.host')->middleware('isHost');
 
     Route::get('/multiplayer/player/{session_code}', [MultiplayerController::class, 'showPlayerView'])->name('quiz.player');
     
     
-    Route::get('/review', [ReviewController::class, 'index'])->name('review.show');
+    Route::get('/review', [ReviewController::class, 'index'])->name('review.show')->middleware('ensureCompletedQuiz'); 
 
     Route::prefix('profile')->group(function () {
         Route::get('/', [ProfileController::class, 'index'])->name('profile');

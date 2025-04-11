@@ -13,6 +13,7 @@ class PlayerCanJoinSession
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
+    // param sebiji $sessionCode
     public function handle(Request $request, Closure $next)
     {
         $userId = $request->input('player_id');

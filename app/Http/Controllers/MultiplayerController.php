@@ -92,7 +92,6 @@ class MultiplayerController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-
         broadcast(new CreateMultiplayerLobby($session, $host, $player));
 
         return response()->json(['message' => 'Player added succesfully', 'data' => $player], 201);

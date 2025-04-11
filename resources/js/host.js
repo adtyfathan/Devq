@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function(){
     const sessionCode = window.location.pathname.split("/").pop();
-    const userId = window.Laravel.user_id;
     const codeDigitContainer = document.getElementById("code-text");
     
     // const questions = await getQuestions(category, difficulty, limit);
@@ -17,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async function(){
         document.getElementById("error-text").textContent = "There is no player here...";
     }
 
-    Echo.private(`multiplayer.${userId}`)
+    Echo.private(`multiplayer.${sessionId}`)
         .listen('CreateMultiplayerLobby', async (event) => {
             if (event.player){
                 document.getElementById("error-text").textContent = "";

@@ -5,5 +5,10 @@
 
     <button id="leave-button">Leave lobby</button>
 
+    <div id="players-wrapper">
+        <p id="error-text"></p>
+        <h1>Player lists</h1>
+    </div>
+
     @vite(['resources/js/player.js'])
 </x-layouts.app>

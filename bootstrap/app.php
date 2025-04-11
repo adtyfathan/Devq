@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Middleware\EnsureUserCompletedQuiz;
 use App\Http\Middleware\PlayerCanJoinSession;
+use App\Http\Middleware\UserIsHost;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,7 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'canJoin' => PlayerCanJoinSession::class
+            'canJoin' => PlayerCanJoinSession::class,
+            'isHost' => UserIsHost::class,
+            'ensureCompletedQuiz' => EnsureUserCompletedQuiz::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
