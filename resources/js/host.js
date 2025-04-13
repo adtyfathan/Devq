@@ -26,7 +26,25 @@ document.addEventListener('DOMContentLoaded', async function(){
         .listen('LeaveMultiplayerLobby', async (event) => {
             removePlayer(event.player.id);
         });
+
+    const startBtn = document.getElementById('start-btn');
+    startBtn.addEventListener("click", async () => {
+        const response = await fetch("/api/multiplayer/start", {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                session_id: sessionId
+            })
+        });
+
+        const data = await response.json();
+    });
 });
+
+
 
 async function getQuestions(category, difficulty, limit){
     try {

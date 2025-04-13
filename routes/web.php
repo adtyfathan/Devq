@@ -38,7 +38,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/multiplayer/host/{session_code}', [MultiplayerController::class, 'showHostView'])->name('quiz.host')->middleware('isHost');
 
     Route::get('/multiplayer/player/{session_code}', [MultiplayerController::class, 'showPlayerView'])->name('quiz.player');
-    
+
+    Route::get('/multiplayer/quiz/{session}', [MultiplayerController::class, 'showMultiplayerQuiz'])->name('quiz.multiplayer');
     
     Route::get('/review', [ReviewController::class, 'index'])->name('review.show')->middleware('ensureCompletedQuiz'); 
 
@@ -64,6 +65,8 @@ Route::prefix('api')->group(function(){
     Route::get('/multiplayer/get-player-session/{player_id}', [MultiplayerController::class, 'getQuizSessionByPlayerId']);
     Route::delete('/multiplayer/remove-session-player', [MultiplayerController::class, 'leaveMultiplayerUser']);
     
+    Route::put('/multiplayer/start', [MultiplayerController::class, 'startMultiplayerQuiz']);
+
     Route::get('/multiplayer/get-players/{session_id}', [MultiplayerController::class, 'getPlayersBySessionId']);
     
     Route::get('/multiplayer/get-session-by-code/{session_code}', [MultiplayerController::class, 'getSessionIdBySessionCode']);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\CreateMultiplayerLobby;
 use App\Events\LeaveMultiplayerLobby;
+use App\Events\QuizStarted;
 use App\Models\MultiplayerSession;
 use App\Models\MultiplayerUser;
 use App\Models\User;
@@ -20,6 +21,10 @@ class MultiplayerController extends Controller
 
     public function __construct(QuizService $quizService){
         $this->quizService = $quizService;
+    }
+
+    public function showMultiplayerQuiz(){
+        return view('quiz.multiplayer');
     }
     
     // ganti nama jadi getQuestions
@@ -218,5 +223,32 @@ class MultiplayerController extends Controller
 
     public function deleteUserSessionByUserId($userId){
         
+    }
+
+    public function startMultiplayerQuiz(Request $request){
+        try {
+            $session = MultiplayerSession::find($request->session_id);
+
+            if ($session->status !== 'waiting') {
+                return response()->json(['message' => 'Quiz already started.'], 400);
+            }
+
+            $session->update(['status' => 'in_progress']);
+
+            // Broadcast to notify all players to redirect
+            broadcast(new QuizStarted($session));
+
+            // Start sending questions
+            // app(QuestionSchedulerService::class)->start($session);
+
+            return response()->json(['message' => 'Quiz started.']);
+        } catch (Exception $e) {
+            Log::error('Error in getQuizSessionByPlayerId method', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
+        }
     }
 }

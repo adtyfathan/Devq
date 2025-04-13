@@ -24,6 +24,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         })
         .listen('LeaveMultiplayerLobby', async (event) => {
             removePlayer(event.player.id);
+        })
+        .listen('QuizStarted', async (event) => {
+            window.location.href = `/multiplayer/quiz/${event.session.session_code}`;
         });
 });
 
