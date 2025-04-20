@@ -13,7 +13,8 @@ class QuizTemplate extends Model
 
     protected $fillable = [
         'category',
-        'difficulty'
+        'difficulty',
+        'question_count'
     ];
 
     public function multiplayerSession(){

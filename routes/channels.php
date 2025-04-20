@@ -17,3 +17,13 @@ Broadcast::channel('multiplayer.{sessionId}', function ($user, $sessionId) {
         ->where('user_id', $user->id)
         ->exists();
 });
+
+Broadcast::channel('quiz.{sessionId}', function ($user, $sessionId) {
+    $session = MultiplayerSession::find($sessionId);
+
+    if (!$session) return false;
+    
+    return MultiplayerUser::where('multiplayer_session_id', $sessionId)
+        ->where('user_id', $user->id)
+        ->exists();
+});

@@ -9,21 +9,24 @@ cardForms.forEach((form) => {
 
         const category = parentCard?.dataset.category;
         const difficulty = form.querySelector('input[name="difficulty"]:checked')?.value;
-        const limit = form.querySelector('input[name="limit"]:checked')?.value;
+        const questionCount = parseInt(form.querySelector('input[name="limit"]:checked')?.value);
+        console.log(questionCount)
+        console.log(typeof(questionCount))
 
         // create template ok
-        const template = await createTemplate(category, difficulty);
+        const template = await createTemplate(category, difficulty, questionCount);
         const templateId = template.data.id
 
         // create session ok
         const session = await createSession(userId, templateId);
+        console.log(session)
         const sessionCode = session.data.session_code;
 
         window.location.href = `/multiplayer/host/${sessionCode}`;
     });
 });
 
-async function createTemplate(category, difficulty) {
+async function createTemplate(category, difficulty, questionCount) {
     try {
         const response = await fetch('/api/template/store', {
             method: 'POST',
@@ -33,7 +36,8 @@ async function createTemplate(category, difficulty) {
             },
             body: JSON.stringify({
                 category: category,
-                difficulty: difficulty
+                difficulty: difficulty,
+                question_count: questionCount
             })
         });
         const data = await response.json();

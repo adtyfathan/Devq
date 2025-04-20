@@ -1,10 +1,8 @@
 const leaveButton = document.getElementById('leave-button');
-const sessionCode = window.location.pathname.split("/").pop();
 const userId = window.Laravel.user_id;
+const sessionCode = window.location.pathname.split("/").pop();
 
 document.addEventListener("DOMContentLoaded", async function () {
-    const sessionCode = window.location.pathname.split("/").pop();
-
     const sessionId = await getSessionIdBySessionCode(sessionCode);
     
     const playersData = await getPlayers(sessionId);

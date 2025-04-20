@@ -9,6 +9,7 @@ use App\Models\MultiplayerSession;
 use App\Models\MultiplayerUser;
 use App\Models\User;
 use App\Services\QuizService;
+use App\Services\QuestionSchedulerService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -239,7 +240,7 @@ class MultiplayerController extends Controller
             broadcast(new QuizStarted($session));
 
             // Start sending questions
-            // app(QuestionSchedulerService::class)->start($session);
+            app(QuestionSchedulerService::class)->start($session);
 
             return response()->json(['message' => 'Quiz started.']);
         } catch (Exception $e) {

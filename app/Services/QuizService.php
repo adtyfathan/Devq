@@ -18,7 +18,7 @@ class QuizService
     public function fetchQuestions($category = null, $difficulty = null, $limit)
     {
         $params = [
-            'limit' => $limit // sementara buat testing
+            'limit' => $limit
         ];
 
         if ($category) {

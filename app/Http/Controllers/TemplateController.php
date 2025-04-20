@@ -15,6 +15,7 @@ class TemplateController extends Controller
             $validated = $request->validate([
                 'category' => 'required|string|max:255',
                 'difficulty' => 'required|string|max:255',
+                'question_count' => 'required'
             ]);
 
             $template = QuizTemplate::create($validated);
