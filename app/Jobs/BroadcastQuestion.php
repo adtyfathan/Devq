@@ -17,11 +17,13 @@ class BroadcastQuestion implements ShouldQueue
     public function __construct(
         public MultiplayerSession $session,
         public array $question,
-        public $questionAt
+        public $openingAt,
+        public $questionAt,
+        public $memeAt
     ) {}
 
     public function handle(): void
     {
-        broadcast(new QuestionBroadcasted($this->session, $this->question, $this->questionAt));
+        broadcast(new QuestionBroadcasted($this->session, $this->question, $this->openingAt, $this->questionAt, memeAt: $this->memeAt));
     }
 }

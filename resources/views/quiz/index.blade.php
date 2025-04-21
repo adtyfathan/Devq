@@ -6,8 +6,6 @@
     <div id="quiz-container">
 
     </div>
-
-    <button id="nextQuestionBtn" style="display: none;">Next</button>
     
     @vite(['resources/js/quiz.js'])
 </x-layouts.app>

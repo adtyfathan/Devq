@@ -19,10 +19,10 @@ class QuestionBroadcasted implements ShouldBroadcast
     public function __construct(
         public MultiplayerSession $session,
         public array $question,
-        public $questionAt)
-    {
-        //
-    }
+        public $openingAt,
+        public $questionAt,
+        public $memeAt
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.
@@ -41,7 +41,9 @@ class QuestionBroadcasted implements ShouldBroadcast
     {
         return [
             'question' => $this->question,
-            'questionAt' => $this->questionAt->toDateTimeString()
+            'openingAt' => $this->openingAt->toDateTimeString(),
+            'questionAt' => $this->questionAt->toDateTimeString(),
+            'memeAt' => $this->memeAt->toDateTimeString()
         ];
     }
 }
