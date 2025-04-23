@@ -1,5 +1,7 @@
 const sessionCode = window.location.pathname.split("/").pop();
+const playerId = window.Laravel.user_id;
 let countdown;
+let hasAnswered;
 let questionCounter = 0;
 
 const containers = {
@@ -13,7 +15,6 @@ const timerText = document.getElementById("timer");
 
 document.addEventListener("DOMContentLoaded", async () => {
     const sessionId = await getSessionIdBySessionCode(sessionCode);
-
     Echo.private(`quiz.${sessionId}`)
         .listen('QuestionBroadcasted', event => handleQuestionEvent(event))
         .listen('StandingsUpdated', event => handleStandingsEvent(event));
@@ -31,6 +32,7 @@ async function getSessionIdBySessionCode(code) {
 
 function handleQuestionEvent(event) {
     questionCounter++;
+    hasAnswered = false;
 
     const now = new Date();
 
@@ -50,8 +52,12 @@ function handleQuestionEvent(event) {
     }, openingDelay);
 
     setTimeout(() => {
+        const timeoutDuration = 15000;
         startTimer(event.questionAt, 15);
         displaySection("quiz", () => renderQuestion(event.question));
+        setTimeout(() => {
+            if (!hasAnswered) handlePlayerAnswer(0, null, false);
+        }, timeoutDuration);
     }, questionDelay);
 
     setTimeout(() => {
@@ -61,7 +67,6 @@ function handleQuestionEvent(event) {
         });
     }, memeDelay);
 }
-
 
 function handleStandingsEvent(event) {
     const now = new Date();
@@ -96,12 +101,19 @@ function renderQuestion(question) {
     `;
 
     document.querySelectorAll(".answer-option").forEach(option => {
-        option.addEventListener("change", () => {
+        option.addEventListener("change", async () => {
+            hasAnswered = true;
             const userAnswer = option.value;
             const correctAnswer = getCorrectAnswer(question.correct_answers);
 
             document.querySelectorAll(".answer-option").forEach(input => input.disabled = true);
-            checkAnswer(correctAnswer, userAnswer);
+            const isTrue = checkAnswer(correctAnswer, userAnswer);
+
+            const correctPoint = 100;
+
+            const handlePlayer = await handlePlayerAnswer(correctPoint, userAnswer, isTrue);
+
+            console.log(handlePlayer.message)
         });
     });
 }
@@ -112,7 +124,15 @@ function getCorrectAnswer(correctAnswers) {
 }
 
 function checkAnswer(correct, selected) {
-    console.log(correct === selected ? "Benar" : `Salah, jawaban benar ${correct}`);
+    if(correct === selected){
+        console.log("Benar");
+        // edit DOM
+        return true;
+    } else {
+        console.log(`Salah, jawaban benar ${correct}`);
+        // edit DOM
+        return false;
+    }
 }
 
 function renderStandings(players) {
@@ -140,4 +160,30 @@ function startTimer(eventScheduledAt, duration) {
         timerText.textContent = `Timer: ${timeLeft}`;
         if (timeLeft <= 0) clearInterval(countdown);
     }, 1000);
+}
+
+async function handlePlayerAnswer(point, userAnswer, isCorrect){
+    const sessionId = await getSessionIdBySessionCode(sessionCode);
+    try {
+        const response = await fetch('/api/multiplayer/update-player-point', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                multiplayer_session_id: sessionId,
+                player_id: playerId,
+                point: point,
+                answer: userAnswer,
+                is_correct: isCorrect
+            })
+        });
+
+        const data = await response.json();
+
+        console.log(data)
+    } catch (error) {
+        console.error("Error: ", error);
+    }
 }

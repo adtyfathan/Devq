@@ -13,8 +13,8 @@ use App\Services\QuestionSchedulerService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class MultiplayerController extends Controller
 {
@@ -244,7 +244,64 @@ class MultiplayerController extends Controller
 
             return response()->json(['message' => 'Quiz started.']);
         } catch (Exception $e) {
-            Log::error('Error in getQuizSessionByPlayerId method', [
+            Log::error('Error in startMultiplayerQuiz method', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function handlePlayerAnswer(Request $request){
+        try {
+            $validated = $request->validate([
+                'multiplayer_session_id' => 'required|exists:multiplayer_session,id',
+                'player_id' => 'required|exists:users,id',
+                'point' => 'required|integer',
+                'answer' => 'nullable|string',
+                'is_correct' => 'required|boolean'
+            ]);
+
+            $cacheKey = "quiz_session:{$validated['multiplayer_session_id']}:user:{$validated['player_id']}:answers";
+            $answers = Cache::get($cacheKey, []);
+
+            $answers[] = [
+                'answer' => $validated['answer'], // nullable OK
+                'is_correct' => $validated['is_correct'],
+                'point' => $validated['point'],
+                'time' => now()->toDateTimeString()
+            ];
+
+            Cache::put($cacheKey, $answers, now()->addMinutes(15));
+
+            if(!$validated['is_correct']){
+                return response()->json(['message' => 'Answer saved'], 200);
+            }
+
+            $current = DB::table('multiplayer_user')
+                ->where('user_id', $validated['player_id'])
+                ->where('multiplayer_session_id', $validated['multiplayer_session_id'])
+                ->first();
+
+            if (!$current) {
+                return response()->json(['message' => 'Player not found in session'], 404);
+            }
+
+            $newPoint = $current->point + $validated['point'];
+
+            $playerQuiz = DB::table('multiplayer_user')
+                ->where('user_id', $validated['player_id'])
+                ->where('multiplayer_session_id', $validated['multiplayer_session_id'])
+                ->update(['point' => $newPoint]);
+            
+            if(!$playerQuiz){
+                return response()->json(['message' => 'Error updating player point'], 400);
+            }
+
+            return response()->json(['message' => 'Point updated', 'data' => $playerQuiz], 200);
+        } catch (Exception $e) {
+            Log::error('Error in updatePoint method', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);

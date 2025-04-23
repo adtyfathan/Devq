@@ -27,7 +27,7 @@ class QuestionSchedulerService{
         $standingsDuration = 10;
 
         // tambahin waktu buat user load halaman pertama kali
-        $startTime = now()->addSeconds(2);
+        $startTime = now()->addSeconds(3);
         
         foreach ($questions as $index => $question) {
             $openingAt = $startTime->copy()->addSeconds(($openingDuration + $questionDuration + $memeDuration + $standingsDuration) * $index);
