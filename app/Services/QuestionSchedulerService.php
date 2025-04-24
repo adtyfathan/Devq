@@ -34,6 +34,7 @@ class QuestionSchedulerService{
             $questionAt = $openingAt->copy()->addSeconds($openingDuration);
             $memeAt = $questionAt->copy()->addSeconds($questionDuration);
             $standingsAt = $memeAt->copy()->addSeconds($memeDuration);
+            $isLast = $index === count($questions) - 1;
 
             BroadcastQuestion::dispatch(
                 $session, 
@@ -47,8 +48,14 @@ class QuestionSchedulerService{
                 ->orderByDesc('point')
                 ->get();
 
-            BroadcastStandings::dispatch($session, $players, $standingsAt)
-                ->delay(max(0, now()->diffInSeconds($standingsAt)));
+            BroadcastStandings::dispatch(
+                $session, 
+                $players, 
+                $standingsAt,
+                $isLast,
+                $category,
+                $difficulty
+            )->delay(max(0, now()->diffInSeconds($standingsAt)));
         }
     }
 }

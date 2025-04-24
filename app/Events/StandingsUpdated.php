@@ -16,7 +16,10 @@ class StandingsUpdated implements ShouldBroadcast
     public function __construct(
         public MultiplayerSession $session,
         public $players,
-        public $standingsAt
+        public $standingsAt,
+        public $isLast,
+        public $category,
+        public $difficulty
     ) {}
 
     public function broadcastOn()
@@ -31,6 +34,9 @@ class StandingsUpdated implements ShouldBroadcast
         return [
             'players' => $this->players,
             'standingsAt' => $this->standingsAt->toDateTimeString(),
+            'isLast' => $this->isLast,
+            'category' => $this->category,
+            'difficulty' => $this->difficulty
         ];
     }
 }

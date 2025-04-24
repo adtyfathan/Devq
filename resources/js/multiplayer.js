@@ -3,12 +3,14 @@ const playerId = window.Laravel.user_id;
 let countdown;
 let hasAnswered;
 let questionCounter = 0;
+let questions = [];
 
 const containers = {
     opening: document.getElementById("opening-container"),
     quiz: document.getElementById("quiz-container"),
     meme: document.getElementById("meme-container"),
     standings: document.getElementById("standings-container"),
+    result: document.getElementById("result-container")
 };
 
 const timerText = document.getElementById("timer");
@@ -17,7 +19,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const sessionId = await getSessionIdBySessionCode(sessionCode);
     Echo.private(`quiz.${sessionId}`)
         .listen('QuestionBroadcasted', event => handleQuestionEvent(event))
-        .listen('StandingsUpdated', event => handleStandingsEvent(event));
+        .listen('StandingsUpdated', event => {
+            console.log("Event masuk: ", event)
+            if (event.isLast){
+                completeQuiz(event);
+            } else {
+                handleStandingsEvent(event);
+            }
+        });
 });
 
 async function getSessionIdBySessionCode(code) {
@@ -52,6 +61,7 @@ function handleQuestionEvent(event) {
     }, openingDelay);
 
     setTimeout(() => {
+        questions.push(event.question);
         const timeoutDuration = 15000;
         startTimer(event.questionAt, 15);
         displaySection("quiz", () => renderQuestion(event.question));
@@ -111,11 +121,42 @@ function renderQuestion(question) {
 
             const correctPoint = 100;
 
-            const handlePlayer = await handlePlayerAnswer(correctPoint, userAnswer, isTrue);
-
-            console.log(handlePlayer.message)
+            const responsePlayerAnswer = await handlePlayerAnswer(correctPoint, userAnswer, isTrue);
         });
     });
+}
+
+function renderResult(falseCount, score, players, quizId){
+    const trueCount = questions.length - falseCount;
+
+    const tableRows = players.map(player => `
+        <tr>
+            <td>${player.username}</td>
+            <td>${player.point}</td>
+        </tr>
+    `).join('');
+
+    containers.result.innerHTML = `
+        <h1>Quiz is done!</h1>
+        <p>True count: ${trueCount}/${questions.length}</p>
+        <p>Final score: ${score}</p>
+
+        <h1>Final result</h1>
+        <table border="1" cellpadding="8" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Point</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tableRows}
+            </tbody>
+        </table>
+
+        <a href="/summary?id=${quizId}">Quiz Details</a>
+        <a href="/">Back Home</a>
+    `;
 }
 
 function getCorrectAnswer(correctAnswers) {
@@ -185,5 +226,61 @@ async function handlePlayerAnswer(point, userAnswer, isCorrect){
         console.log(data)
     } catch (error) {
         console.error("Error: ", error);
+    }
+}
+
+async function getUserAnswers(){
+    const sessionId = await getSessionIdBySessionCode(sessionCode);
+
+    try {
+        const response = await fetch(`/api/multiplayer/get-user-answers/${sessionId}/${playerId}`)
+        const data = await response.json();
+        return data.data;
+    } catch (error) {
+        console.error("Error: ", error);
+    }
+} 
+
+async function completeQuiz(event){
+    let savedAnswer = [];
+    let falseAnswer = 0;
+    
+    const userAnswers = await getUserAnswers();
+
+    userAnswers.forEach(userAnswer => {
+        savedAnswer.push(userAnswer.answer);
+        if (!userAnswer.is_correct) falseAnswer++;
+    });
+
+    const score = ((userAnswers.length - falseAnswer) / userAnswers.length) * 100;
+
+    console.log("Jawaban user: ",userAnswers)
+
+    try {
+        const res = await fetch('/api/quiz/store', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                user_id: playerId,
+                score,
+                category: event.category,
+                difficulty: event.difficulty,
+                user_answer: savedAnswer,
+                questions
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.id) {
+            displaySection("result", () => renderResult(falseAnswer, score, event.players, data.id));
+        } else {
+            console.error("Quiz ID not returned:", data);
+        }
+    } catch (err) {
+        console.error("Error:", err);
     }
 }

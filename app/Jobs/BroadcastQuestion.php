@@ -19,7 +19,7 @@ class BroadcastQuestion implements ShouldQueue
         public array $question,
         public $openingAt,
         public $questionAt,
-        public $memeAt
+        public $memeAt,
     ) {}
 
     public function handle(): void

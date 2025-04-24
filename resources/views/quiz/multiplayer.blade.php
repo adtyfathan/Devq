@@ -17,6 +17,10 @@
 
     </div>
 
+    <div id="result-container" class="result-container">
+
+    </div>
+
     <div id="standings-container" class="standings-container">
         <table id="standings-table">
             <thead>

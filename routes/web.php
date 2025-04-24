@@ -73,6 +73,8 @@ Route::prefix('api')->group(function(){
 
     Route::put('/multiplayer/update-player-point', [MultiplayerController::class, 'handlePlayerAnswer']);
     
+    Route::get('/multiplayer/get-user-answers/{session_id}/{player_id}', [MultiplayerController::class, 'getUserAnswers']);
+    
     Route::post('/quiz/store', [WebQuizController::class, 'storeQuiz']);
     Route::get('/history/{user_id}', [WebQuizController::class, 'getQuizByUserId']);
     Route::get('/review/{id}', [ReviewController::class, 'getQuizReview']);

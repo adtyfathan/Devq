@@ -65,10 +65,6 @@ class MultiplayerController extends Controller
         }
     }
 
-    public function updateSessionState(){
-        
-    }
-
     public function createMultiplayerUser(Request $request){
         $validated = $request->validate([
             'session_id' => 'required|exists:multiplayer_session,id',
@@ -140,7 +136,6 @@ class MultiplayerController extends Controller
         }
     }
 
-    
     public function getQuizSessionByPlayerId($playerId)
     {
         try {
@@ -308,5 +303,12 @@ class MultiplayerController extends Controller
 
             return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
         }
+    }
+
+    public function getUserAnswers($sessionId, $playerId){
+        $cacheKey = "quiz_session:{$sessionId}:user:{$playerId}:answers";
+        $answers = Cache::get($cacheKey, []);
+
+        return response()->json(['message' => 'User answers retrieved', 'data' => $answers]);
     }
 }

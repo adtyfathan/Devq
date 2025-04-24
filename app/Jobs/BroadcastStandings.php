@@ -9,6 +9,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use OutOfBoundsException;
 
 class BroadcastStandings implements ShouldQueue
 {
@@ -20,7 +21,10 @@ class BroadcastStandings implements ShouldQueue
     public function __construct(
         public MultiplayerSession $session,
         public $players,
-        public $standingsAt
+        public $standingsAt,
+        public $isLast,
+        public $category,
+        public $difficulty
     ) {}
 
     /**
@@ -28,6 +32,6 @@ class BroadcastStandings implements ShouldQueue
      */
     public function handle(): void
     {
-        broadcast(new StandingsUpdated($this->session, $this->players, $this->standingsAt));
+        broadcast(new StandingsUpdated($this->session, $this->players, $this->standingsAt, isLast: $this->isLast, category: $this->category, difficulty: $this->difficulty));
     }
 }

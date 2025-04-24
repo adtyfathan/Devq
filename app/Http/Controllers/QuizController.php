@@ -60,6 +60,7 @@ class QuizController extends Controller
                 'difficulty' => $validated['difficulty']
             ]);
 
+            // buat scenario buat input quiz dari template
             for($i = 0; $i < count($validated['user_answer']); $i++){
                 $quiz->questions()->attach($questionIds[$i], ['user_answer' => $validated['user_answer'][$i]]);
             }
